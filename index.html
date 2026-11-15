@@ -163,6 +163,18 @@
       .sync-status { margin-top: 10px; background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; box-shadow: var(--shadow); padding: 10px 14px; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
       .sync-status.error { color: var(--danger); border-color: var(--danger); }
       .sync-status button { margin-left: auto; border: 1px solid var(--card-border); background: var(--bg); color: var(--ink); border-radius: 999px; min-height: 36px; padding: 4px 16px; font-size: 13px; font-weight: 700; }
+      .cache-notice { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px dashed var(--card-border); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+      .cache-notice::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); flex: none; }
+      /* 初回読み込み中：大きな時刻表示の代わりに「読み込み中…」を控えめな大きさで出す */
+      #homeView .cat-card.is-loading .hc-time { font-size: 20px; line-height: 1.3; white-space: normal; color: var(--ink-soft); padding-top: 2px; }
+      #homeView .cat-card.is-loading .hc-grams { display: none; }
+      #homeView .cat-card.is-loading .hc-cols { flex-wrap: wrap; gap: 4px 0; }
+      #homeView .cat-card.is-loading .hc-left { flex: 1 1 100%; }
+      #homeView .cat-card.is-loading .hc-divider { display: none; }
+      #homeView .cat-card.is-loading .hc-right { flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
+      #homeView .cat-card.is-loading .hc-total { margin-top: 0; order: 1; }
+      #homeView .cat-card.is-loading .hc-goal { order: 2; text-align: left; margin-top: 0; }
+      #homeView .cat-card.is-loading .hc-bar { order: 3; flex: 1 1 100%; margin-top: 2px; }
 
       /* トップ画面：スマホ1画面（高さ740〜800px）にスクロールなしで収めるための調整
          ホーム内だけに効かせ、入力画面の見た目には影響させない。通常フローのまま余白とサイズだけ詰める */
@@ -241,8 +253,19 @@
       .record-btn.toki { background: var(--toki); }
       .record-btn.kotaro { background: var(--kotaro); }
       .record-btn:active { transform: scale(.98); }
-      .chips { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-      .chips button { border: 1px solid var(--card-border); background: var(--bg); color: var(--ink); border-radius: 999px; min-height: 40px; padding: 4px 16px; font-size: 15px; font-weight: 700; }
+      /* 足し算チップ：3個×2段のグリッド。押すたびにその数字が今の入力値に足される */
+      .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+      .chips button { border: 1.5px solid var(--card-border); background: var(--bg); color: var(--ink); border-radius: 14px; min-height: 48px; padding: 4px 6px; font-size: 19px; font-weight: 900; font-family: "Zen Maru Gothic",sans-serif; }
+      .input-card.toki .chips button { border-color: var(--toki-border); background: var(--toki-soft); }
+      .input-card.kotaro .chips button { border-color: var(--kotaro-border); background: var(--kotaro-soft); }
+      .chips button:active { transform: scale(.96); }
+      .chip-tools { display: flex; align-items: center; gap: 8px; margin-top: 8px; min-height: 36px; }
+      .chip-expr { flex: 1 1 0; min-width: 0; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); line-height: 1.35; }
+      .chip-tools-btns { display: flex; gap: 7px; flex: none; }
+      .chip-tool-btn { border: 1px solid var(--card-border); background: var(--card); color: var(--ink); border-radius: 999px; min-height: 36px; padding: 4px 14px; font-size: 13.5px; font-weight: 700; box-shadow: var(--shadow); }
+      .chip-tool-btn.clear { color: var(--danger); }
+      .chip-tool-btn:disabled { color: var(--ink-faint); box-shadow: none; }
+      .chip-tool-btn:active { transform: scale(.97); }
       .form-msg { min-height: 20px; font-size: 13px; font-weight: 700; color: var(--danger); margin-top: 6px; }
       .history-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 22px; }
       .history-title { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 18px; }
@@ -259,37 +282,40 @@
       .history-empty { background: var(--card); border: 1px dashed var(--card-border); border-radius: 14px; padding: 18px; text-align: center; color: var(--ink-faint); font-size: 14.5px; }
 
       /* 入力画面：スマホ1画面に収めるための調整（入力画面内だけに効かせる。通常フローのまま余白とサイズだけ詰める） */
-      #inputView .input-card { margin-top: 8px; padding-bottom: 10px; }
-      #inputView .input-card .card-head { padding: 6px 12px; gap: 10px; }
-      #inputView .cat-photo-lg { width: 48px; height: 48px; border-radius: 10px; }
+      #inputView .input-card { margin-top: 8px; padding-bottom: 8px; }
+      #inputView .input-card .card-head { padding: 4px 12px; gap: 10px; }
+      #inputView .cat-photo-lg { width: 40px; height: 40px; border-radius: 10px; }
       #inputView .input-card .cat-name { font-size: 22px; }
-      #inputView .input-inner { padding: 8px 12px 0; }
-      #inputView .last-box { padding: 8px 12px; border-radius: 12px; }
+      #inputView .input-inner { padding: 6px 12px 0; }
+      #inputView .last-box { padding: 5px 12px; border-radius: 12px; }
       #inputView .last-label { font-size: 11px; line-height: 1.3; }
-      #inputView .last-time { font-size: 36px; }
+      #inputView .last-time { font-size: 30px; }
       #inputView .last-grams { font-size: 20px; }
       #inputView .last-meta { margin-top: 1px; gap: 6px; line-height: 1.3; }
       #inputView .last-ago { font-size: 12.5px; padding: 1px 9px; }
       #inputView .last-giver { font-size: 12px; }
       #inputView .last-none { font-size: 17px; margin-top: 0; }
       #inputView .last-sub { font-size: 11.5px; margin-top: 1px; }
-      #inputView .input-card .total-zone { padding: 8px 0 0; }
+      #inputView .input-card .total-zone { padding: 5px 0 0; }
       #inputView .total-row { line-height: 1.25; }
       #inputView .total-num { font-size: 18px; }
       #inputView .bar { height: 8px; margin-top: 3px; }
-      #inputView .recent-warn { margin-top: 6px; padding: 7px 12px; font-size: 14.5px; line-height: 1.35; border-radius: 12px; }
+      #inputView .recent-warn { margin-top: 5px; padding: 5px 12px; font-size: 14px; line-height: 1.35; border-radius: 12px; }
       #inputView .recent-warn .recent-warn-sub { font-size: 12px; margin-top: 1px; }
-      #inputView .meal-form { margin-top: 8px; }
-      #inputView .gram-input-box input { font-size: 24px; padding: 6px 0; }
-      #inputView .record-btn { min-height: 52px; font-size: 19px; }
-      #inputView .chips { gap: 7px; margin-top: 8px; }
-      #inputView .chips button { min-height: 34px; padding: 2px 13px; font-size: 14px; }
-      #inputView .form-msg { min-height: 16px; font-size: 12.5px; margin-top: 4px; }
-      #inputView .history-head { margin-top: 12px; }
+      #inputView .meal-form { margin-top: 6px; }
+      #inputView .gram-input-box input { font-size: 28px; padding: 2px 0; }
+      #inputView .record-btn { min-height: 46px; font-size: 19px; }
+      #inputView .chips { gap: 5px; margin-top: 6px; }
+      #inputView .chips button { min-height: 36px; font-size: 17px; }
+      #inputView .chip-tools { margin-top: 4px; min-height: 28px; }
+      #inputView .chip-tool-btn { min-height: 28px; padding: 2px 13px; }
+      #inputView .form-msg { min-height: 16px; font-size: 12.5px; margin-top: 3px; }
+      #inputView .form-msg:empty { min-height: 0; margin-top: 0; }
+      #inputView .history-head { margin-top: 6px; }
       #inputView .history-title { font-size: 16px; }
-      #inputView .undo-btn { min-height: 34px; padding: 4px 13px; font-size: 13px; }
-      #inputView .history-list { margin-top: 8px; gap: 6px; }
-      #inputView .history-item { padding: 7px 11px; gap: 9px; border-radius: 12px; }
+      #inputView .undo-btn { min-height: 32px; padding: 4px 13px; font-size: 13px; }
+      #inputView .history-list { margin-top: 5px; gap: 4px; }
+      #inputView .history-item { padding: 4px 11px; gap: 9px; border-radius: 12px; }
       #inputView .history-time { font-size: 16px; min-width: 50px; }
       #inputView .history-what { font-size: 14px; line-height: 1.3; }
       #inputView .history-what .who { font-size: 11.5px; }
@@ -431,6 +457,7 @@
         </div>
         <p class="guide-line">ごはんの目安は <b>7時・13時・21時</b> ／ 1日は朝4時から数えます</p>
         <div class="sync-status" id="syncStatus" hidden><span id="syncStatusText">読み込み中…</span><button type="button" id="syncRetryBtn" hidden>再試行</button></div>
+        <div><span class="cache-notice" id="cacheNotice" hidden>前回の記録を表示中</span></div>
 
         <div class="cards">
           <button type="button" class="cat-card toki" id="card-toki" aria-label="ときの入力画面を開く">
@@ -565,12 +592,20 @@
                 </label>
                 <button class="record-btn toki" type="submit" id="recordBtn">ごはん記録</button>
               </div>
-              <div class="chips" aria-label="よく使う量">
-                <button type="button" data-g="3">3g</button>
-                <button type="button" data-g="5">5g</button>
-                <button type="button" data-g="10">10g</button>
-                <button type="button" data-g="13">13g</button>
-                <button type="button" data-g="15">15g</button>
+              <div class="chips" aria-label="足し算チップ（押すたびに今の量へ足されます）">
+                <button type="button" data-add="1">+1g</button>
+                <button type="button" data-add="2">+2g</button>
+                <button type="button" data-add="3">+3g</button>
+                <button type="button" data-add="5">+5g</button>
+                <button type="button" data-add="7">+7g</button>
+                <button type="button" data-add="10">+10g</button>
+              </div>
+              <div class="chip-tools">
+                <span class="chip-expr" id="chipExpr" aria-live="polite">チップで足し算できます</span>
+                <span class="chip-tools-btns">
+                  <button type="button" class="chip-tool-btn" id="chipUndoBtn" disabled>↩ 1つ戻す</button>
+                  <button type="button" class="chip-tool-btn clear" id="chipClearBtn" disabled>クリア</button>
+                </span>
               </div>
               <div class="form-msg" id="formMsg" role="alert"></div>
             </form>
@@ -640,6 +675,19 @@
       }
       var DataStore = {
         GIVER_KEY: 'neko-gohan-giver-v1',
+        CACHE_KEY: 'neko-gohan-records-cache-v1',
+        getCachedRecords: function () {
+          try {
+            var raw = localStorage.getItem(this.CACHE_KEY);
+            if (raw === null) return null;
+            var arr = JSON.parse(raw);
+            if (!Array.isArray(arr)) return null;
+            return arr.map(normalizeRecord).filter(function (r) { return r.cat && r.kind; });
+          } catch (e) { return null; }
+        },
+        setCachedRecords: function (records) {
+          try { localStorage.setItem(this.CACHE_KEY, JSON.stringify(records.map(toWireRecord))); } catch (e) {}
+        },
         fetchRecords: function () {
           return fetch(BRIDGE_URL + '?pass=' + encodeURIComponent(BRIDGE_PASS) + '&action=list')
             .then(function (res) { if (!res.ok) throw new Error('http ' + res.status); return res.json(); })
@@ -664,7 +712,10 @@
       };
       var KIND_LABEL = { meal: 'ごはん', churu: 'ちゅーる', katsuo: '鰹節' };
       var DOW = ['日','月','火','水','木','金','土'];
-      var state = { records: [], giver: '', view: 'home', currentCat: 'toki', pendingSnack: null, snackSel: { toki: false, kotaro: false } };
+      var state = { records: [], giver: '', view: 'home', currentCat: 'toki', pendingSnack: null, snackSel: { toki: false, kotaro: false }, hasLoadedOnce: false, showingCached: false };
+      /* 初回の取得が終わる前で、前回の表示も無い状態かどうか（この間は「まだ食べてない」を出さない） */
+      function isInitialLoading() { return !state.hasLoadedOnce && !state.showingCached; }
+      function updateCacheNotice() { var el = document.getElementById('cacheNotice'); if (el) el.hidden = !state.showingCached; }
 
       function dayKeyOf(date) { var d = new Date(date.getTime() - 4*60*60*1000); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
       function todayKey() { return dayKeyOf(new Date()); }
@@ -685,6 +736,9 @@
       function recentInfo(cat) { var last = lastMeal(cat); if (!last) return null; var diff = Date.now()-last.ts; if (diff < 0 || diff >= RECENT_MS) return null; return last; }
 
       function lastInfo(cat) {
+        if (isInitialLoading()) {
+          return { label: '最後に食べたのは', recent: false, html: '<div class="last-none">読み込み中…</div><div class="last-sub">記録を読み込んでいます</div>' };
+        }
         var todays = todayMeals(cat);
         var latestToday = todays.length ? todays.reduce(function(a,b){ return a.ts>b.ts?a:b; }) : null;
         if (latestToday) {
@@ -698,15 +752,31 @@
       }
 
       function renderCard(cat) {
-        var recent = !!recentInfo(cat);
         var cardEl = document.getElementById('card-'+cat);
+        var timeEl = document.getElementById(cat+'CardTime');
+        var gramsEl = document.getElementById(cat+'CardGrams');
+        var subEl = document.getElementById(cat+'CardLeftSub');
+        if (isInitialLoading()) {
+          cardEl.classList.remove('recent', 'is-empty');
+          cardEl.classList.add('is-loading');
+          document.getElementById(cat+'RecentBadge').hidden = true;
+          timeEl.textContent = '読み込み中…';
+          gramsEl.textContent = '—';
+          subEl.innerHTML = '<span class="hc-empty-sub">記録を読み込んでいます</span>';
+          document.getElementById(cat+'CardTotal').textContent = '—';
+          if (cat === 'toki') {
+            document.getElementById('tokiCardGoalLine').textContent = '目標 40g';
+            document.getElementById('tokiCardBar').style.width = '0%';
+            document.getElementById('tokiCardOver').hidden = true;
+          }
+          return;
+        }
+        cardEl.classList.remove('is-loading');
+        var recent = !!recentInfo(cat);
         cardEl.classList.toggle('recent', recent);
         document.getElementById(cat+'RecentBadge').hidden = !recent;
         var todays = todayMeals(cat);
         var latestToday = todays.length ? todays.reduce(function(a,b){ return a.ts>b.ts?a:b; }) : null;
-        var timeEl = document.getElementById(cat+'CardTime');
-        var gramsEl = document.getElementById(cat+'CardGrams');
-        var subEl = document.getElementById(cat+'CardLeftSub');
         if (latestToday) {
           cardEl.classList.remove('is-empty');
           timeEl.textContent = fmtTimeShort(latestToday.ts);
@@ -737,6 +807,14 @@
         var ul = document.getElementById('recentList');
         var empty = document.getElementById('recentEmpty');
         ul.innerHTML = '';
+        if (isInitialLoading()) {
+          ul.style.display = 'none';
+          empty.style.display = 'block';
+          empty.textContent = '読み込み中…';
+          document.getElementById('homeUndoBtn').disabled = true;
+          return;
+        }
+        empty.textContent = 'まだ記録がありません';
         ul.style.display = list.length ? 'block' : 'none';
         empty.style.display = list.length ? 'none' : 'block';
         list.forEach(function(r){
@@ -748,7 +826,7 @@
         document.getElementById('homeUndoBtn').disabled = state.records.length === 0;
       }
 
-      function renderHome() { renderCard('toki'); renderCard('kotaro'); renderGiver(); renderRecent(); }
+      function renderHome() { renderCard('toki'); renderCard('kotaro'); renderGiver(); renderRecent(); updateCacheNotice(); }
       function renderGiver() { document.getElementById('giverName').textContent = state.giver || '未設定'; }
 
       function renderInput() {
@@ -788,6 +866,7 @@
         var list = state.records.filter(function(r){ return r.cat===cat && dayKeyOf(new Date(r.ts))===key; }).slice().sort(function(a,b){ return b.ts-a.ts; }).slice(0,3);
         var ul = document.getElementById('historyList'), empty = document.getElementById('historyEmpty');
         ul.innerHTML = ''; empty.style.display = list.length ? 'none' : 'block';
+        empty.textContent = isInitialLoading() ? '読み込み中…' : '今日はまだ記録がありません';
         list.forEach(function(r){
           var li = document.createElement('li'); li.className = 'history-item';
           li.innerHTML = '<span class="history-time">' + fmtTimeShort(r.ts) + '</span><span class="dot ' + r.cat + '"></span><span class="history-what">' + describeRecord(r) + '<span class="who">' + giverHTML(r.giver) + '</span></span>';
@@ -812,6 +891,7 @@
         state.records.forEach(function(r){ var k = dayKeyOf(new Date(r.ts)); (byDay[k] = byDay[k] || []).push(r); });
         var keys = Object.keys(byDay).sort().reverse();
         empty.style.display = keys.length ? 'none' : 'block';
+        empty.textContent = isInitialLoading() ? '読み込み中…' : 'まだ記録がありません';
         keys.forEach(function(k){
           var recs = byDay[k].slice().sort(function(a,b){ return b.ts-a.ts; });
           var totals = { toki: 0, kotaro: 0 };
@@ -843,7 +923,7 @@
       }
 
       function showHome() { state.view='home'; state.pendingSnack=null; document.getElementById('inputView').hidden=true; document.getElementById('snackView').hidden=true; document.getElementById('historyView').hidden=true; document.getElementById('homeView').hidden=false; window.scrollTo(0,0); renderHome(); updateBottomBar(); }
-      function showInput(cat) { state.currentCat=cat; state.view='input'; document.getElementById('gramsInput').value=''; document.getElementById('formMsg').textContent=''; document.getElementById('homeView').hidden=true; document.getElementById('snackView').hidden=true; document.getElementById('historyView').hidden=true; document.getElementById('inputView').hidden=false; window.scrollTo(0,0); renderInput(); updateBottomBar(); }
+      function showInput(cat) { state.currentCat=cat; state.view='input'; document.getElementById('gramsInput').value=''; document.getElementById('formMsg').textContent=''; chipStack = []; updateChipTools(); document.getElementById('homeView').hidden=true; document.getElementById('snackView').hidden=true; document.getElementById('historyView').hidden=true; document.getElementById('inputView').hidden=false; window.scrollTo(0,0); renderInput(); updateBottomBar(); }
       function showHistory() { state.view='history'; document.getElementById('homeView').hidden=true; document.getElementById('inputView').hidden=true; document.getElementById('snackView').hidden=true; document.getElementById('historyView').hidden=false; window.scrollTo(0,0); renderHistoryAll(); updateBottomBar(); }
       function showSnackPick(kind) {
         if (!state.giver) { openGiverModal(false); return; }
@@ -875,12 +955,18 @@
         if (showLoading) setSyncStatus('loading', '読み込み中…');
         return DataStore.fetchRecords().then(function (records) {
           state.records = records;
+          state.hasLoadedOnce = true;
+          state.showingCached = false;
+          DataStore.setCachedRecords(records);
           syncBusy = false;
           setSyncStatus('hide');
           renderAll();
           return true;
         }).catch(function () {
           syncBusy = false;
+          /* 失敗時は今の表示（前回の表示があればそれ）をそのまま保ち、空表示には切り替えない。
+             前回の表示が無い初回だけ、読み込み中表示を終えてエラー＋再試行に任せる */
+          if (!state.showingCached) state.hasLoadedOnce = true;
           setSyncStatus('error', '読み込めませんでした。通信を確認してください。');
           renderAll();
           return false;
@@ -904,6 +990,7 @@
         DataStore.addRecord(newRecord(cat,'meal',grams)).then(function () {
           btn.disabled = false;
           input.value='';
+          resetChipState();
           return refreshRecords(false).then(function () {
             showHome();
             toast(CATS[cat].name + 'のごはん ' + fmtGrams(grams) + ' を記録しました');
@@ -914,6 +1001,45 @@
           msg.textContent='送信できませんでした。通信を確認して、もう一度お試しください';
         });
       }
+
+      /* 足し算チップ：押した数字の履歴を持ち、「1つ戻す」で最後の1回分だけ引けるようにする。
+         直接入力したときは履歴をリセットし、打った値そのものが合計になる */
+      var chipStack = [];
+      function currentGramsValue() { var v = parseFloat(document.getElementById('gramsInput').value); return isNaN(v) ? 0 : v; }
+      function updateChipTools() {
+        var expr = document.getElementById('chipExpr');
+        var total = currentGramsValue();
+        if (chipStack.length) {
+          expr.textContent = chipStack.join('＋') + ' ＝ ' + fmtGrams(total);
+        } else if (total > 0) {
+          expr.textContent = '合計 ' + fmtGrams(total);
+        } else {
+          expr.textContent = 'チップで足し算できます';
+        }
+        document.getElementById('chipUndoBtn').disabled = chipStack.length === 0;
+        document.getElementById('chipClearBtn').disabled = chipStack.length === 0 && total <= 0;
+      }
+      function addChip(add) {
+        var input = document.getElementById('gramsInput');
+        input.value = Math.round((currentGramsValue() + add) * 10) / 10;
+        chipStack.push(add);
+        document.getElementById('formMsg').textContent = '';
+        updateChipTools();
+      }
+      function undoChip() {
+        if (!chipStack.length) return;
+        var last = chipStack.pop();
+        var next = Math.round((currentGramsValue() - last) * 10) / 10;
+        document.getElementById('gramsInput').value = next > 0 ? next : '';
+        updateChipTools();
+      }
+      function clearGrams() {
+        chipStack = [];
+        document.getElementById('gramsInput').value = '';
+        document.getElementById('formMsg').textContent = '';
+        updateChipTools();
+      }
+      function resetChipState() { chipStack = []; updateChipTools(); }
 
       function renderSnackPick() {
         var any = false;
@@ -1005,7 +1131,16 @@
         var now = new Date();
         document.getElementById('todayDate').textContent = (now.getMonth()+1) + '月' + now.getDate() + '日';
         document.getElementById('todayDow').textContent = '（' + DOW[now.getDay()] + '）';
-        state.records = [];
+        var cached = DataStore.getCachedRecords();
+        if (cached !== null) {
+          /* 前回取得した記録が残っていれば、まずそれを即座に表示する（裏側で最新を取り直す） */
+          state.records = cached;
+          state.showingCached = true;
+        } else {
+          state.records = [];
+          state.showingCached = false;
+        }
+        state.hasLoadedOnce = false;
         state.giver = DataStore.getGiver();
         renderAll();
         setSyncStatus('loading', '読み込み中…');
@@ -1024,7 +1159,11 @@
         updateBottomBar();
 
         document.getElementById('mealForm').addEventListener('submit', submitMeal);
-        Array.prototype.forEach.call(document.querySelectorAll('.chips button'), function(btn){ btn.addEventListener('click', function(){ document.getElementById('gramsInput').value = btn.getAttribute('data-g'); document.getElementById('formMsg').textContent=''; }); });
+        Array.prototype.forEach.call(document.querySelectorAll('.chips button'), function(btn){ btn.addEventListener('click', function(){ addChip(parseFloat(btn.getAttribute('data-add'))); }); });
+        document.getElementById('chipUndoBtn').addEventListener('click', undoChip);
+        document.getElementById('chipClearBtn').addEventListener('click', clearGrams);
+        document.getElementById('gramsInput').addEventListener('input', function(){ chipStack = []; updateChipTools(); });
+        updateChipTools();
         document.getElementById('undoBtn').addEventListener('click', undoLast);
         document.getElementById('undoConfirmBtn').addEventListener('click', confirmUndo);
         document.getElementById('undoCancelBtn').addEventListener('click', closeUndoConfirm);
