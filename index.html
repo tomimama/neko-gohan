@@ -426,8 +426,10 @@
       /* 写真は標準で約102×122px（実機表示どおり・比率51:61で固定）。
          文字カラム（.hc-main）は min-content まで縮まないため、画面が狭い／文字が大きい端末では
          溢れた分だけ写真が flex-shrink で縮む。その際も aspect-ratio が固定なので縦横同じ割合で縮み、
-         横だけ細くなったりトリミング範囲が変わったりしない。下限54px（高さ約65px） */
-      .cat-photo-home { width: 102px; flex: 0 1 102px; min-width: 54px; aspect-ratio: 51 / 61; height: auto; align-self: flex-start; border-radius: 14px; object-fit: cover; object-position: center; }
+         横だけ細くなったりトリミング範囲が変わったりしない。
+         下限は24px（高さ約29px）：2列の文字が入りきらないときは、列を縦積みにせず
+         写真がここまで縮んで文字の場所を空ける（標準幅・標準文字では従来どおり102pxのまま） */
+      .cat-photo-home { width: 102px; flex: 0 1 102px; min-width: 24px; aspect-ratio: 51 / 61; height: auto; align-self: flex-start; border-radius: 14px; object-fit: cover; object-position: center; }
       .hc-main { flex: 1 1 0; min-width: min-content; max-width: 100%; display: flex; flex-direction: column; gap: 7px; overflow: hidden; }
       .hc-top { display: flex; align-items: center; gap: 6px; width: 100%; flex-wrap: wrap; row-gap: 4px; min-width: 0; }
       .hc-namewrap { display: inline-flex; align-items: center; gap: 5px; flex: 0 1 auto; min-width: 0; }
@@ -475,22 +477,34 @@
       #homeView .footnote { overflow-wrap: anywhere; }
       #homeView .history-link-btn { overflow-wrap: anywhere; white-space: normal; line-height: 1.4; }
       /* 狭幅でも写真の固定縮小はしない（標準幅では従来どおり102px）。
-         狭さ・文字拡大への対応は上の flex 構造（文字が場所を取り、写真が比率を保って縮む）が担う */
+         狭さ・文字拡大への対応は上の flex 構造（文字が場所を取り、写真が比率を保って縮む）が担う。
+         記録ありカードの2列（左：時刻まわり／右：グラムまわり）はどの幅でも崩さない：
+         縦積みへのフォールバックは使わず、足りない分は写真の縮小と余白・間隔の圧縮でまかなう */
       @media (max-width: 390px) {
         .hc-total { justify-content: flex-start; }
         .hc-right { align-items: stretch; }
         .hc-grams { text-align: center; }
       }
       @media (max-width: 340px) {
-        /* 最終フォールバック：写真が下限まで縮んでも入らない極端な狭幅では、
-           文字サイズは下げず、左右カラムを縦積みにして時刻・グラムも見切れないようにする */
-        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-cols { flex-wrap: wrap; gap: 4px 0; }
-        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-left,
-        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-right { flex: 1 1 100%; }
-        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-divider { display: none; }
+        /* 狭幅の圧縮（一段目）：文字サイズは下げない。カードの余白と要素間の間隔だけを詰め、
+           2列は横並びのまま維持する。写真は flex でさらに縮んで文字の場所を空ける */
+        #homeView .cat-card { padding: 8px; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc { gap: 6px; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-main { gap: 5px; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-cols { flex-wrap: nowrap; gap: 5px; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-top { gap: 4px; row-gap: 3px; }
         .hc-total-label { white-space: normal; overflow-wrap: anywhere; flex: 0 1 auto; }
         .hc-goal { white-space: normal; overflow-wrap: anywhere; }
         #homeView .recent-badge { white-space: normal; overflow-wrap: anywhere; text-align: center; line-height: 1.3; }
+      }
+      @media (max-width: 300px) {
+        /* 狭幅の圧縮（二段目）：さらに余白・間隔を詰める。それでも足りない分は写真が下限（24px）まで縮む */
+        .wrap { padding-left: 8px; padding-right: 8px; }
+        #homeView .cat-card { padding: 6px; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc { gap: 4px; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-main { gap: 4px; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-cols { gap: 4px; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-left-sub { gap: 2px; margin-top: 3px; }
       }
 
       .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translate(-50%,80px); z-index: 60; background: var(--ink); color: var(--bg); font-weight: 700; font-size: 15.5px; border-radius: 999px; padding: 12px 22px; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; pointer-events: none; transition: transform .25s ease, opacity .25s ease; max-width: calc(100vw - 32px); text-align: center; }
