@@ -274,11 +274,13 @@
         78% { transform: scale(.99,1) translateY(0); }
         100% { transform: scale(1,1) translateY(0); }
       }
-      .record-btn.is-peko, .snack-ok-btn.is-peko { animation: peko-press .28s cubic-bezier(.34,1.4,.64,1) both; will-change: transform; }
+      /* ペコっとは全ボタン共通：押した瞬間に必ず再生する（記録・おやつOK・チップ以外も含む） */
+      button.is-peko { animation: peko-press .28s cubic-bezier(.34,1.4,.64,1) both; will-change: transform; }
       .chips button.is-peko { animation: peko-chip .24s cubic-bezier(.34,1.4,.64,1) both; will-change: transform; }
-      /* is-saving 中でもペコが分かるよう、保存中の縮みよりアニメーションを優先する */
-      .record-btn.is-saving.is-peko, .snack-ok-btn.is-saving.is-peko { animation: peko-press .28s cubic-bezier(.34,1.4,.64,1) both; }
-      @media (prefers-reduced-motion: reduce) { .record-btn.is-saving::before, .snack-ok-btn.is-saving::before, .modal .undo-delete.is-deleting::before { animation: none; } .record-btn.is-peko, .snack-ok-btn.is-peko, .chips button.is-peko { animation: none; } }
+      /* 押している間の沈み込み（:active）：アニメーションの前の一瞬でも反応が分かるよう、:active が無かったボタンにも付ける */
+      .giver-badge button:active, .undo-mini:active, .undo-btn:active, .history-link-btn:active, .back-btn:active, .sync-status button:active, .modal .pick button:active, .modal .cancel:active, .modal .undo-cancel:active { transform: scale(.97); }
+      .cat-card:active { transform: scale(.985); }
+      @media (prefers-reduced-motion: reduce) { .record-btn.is-saving::before, .snack-ok-btn.is-saving::before, .modal .undo-delete.is-deleting::before, .snack-status .spin { animation: none; } button.is-peko { animation: none; } }
       /* 足し算チップ：3個×2段のグリッド。押すたびにその数字が今の入力値に足される */
       .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
       .chips button { border: 1.5px solid var(--card-border); background: var(--bg); color: var(--ink); border-radius: 14px; min-height: 48px; padding: 4px 6px; font-size: 19px; font-weight: 900; font-family: "Zen Maru Gothic",sans-serif; }
@@ -394,6 +396,14 @@
       .snack-ok-btn.is-saving:disabled { opacity: 1; cursor: default; }
       .snack-ok-btn.is-saving { transform: scale(.97); filter: brightness(.85); box-shadow: inset 0 3px 8px rgba(0,0,0,.25); }
       .snack-ok-btn.is-saving::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.4); border-top-color: currentColor; animation: btn-spin .7s linear infinite; }
+      /* おやつ記録中：ボタンだけでなく画面側にも処理中を出す（固まったように見せないため）。
+         送信件数の進み具合もここに出す */
+      .snack-status { margin: 12px 0 0; display: flex; align-items: center; gap: 10px; background: var(--card); border: 1.5px solid var(--card-border); border-radius: 14px; padding: 12px 14px; font-size: 15px; font-weight: 700; box-shadow: var(--shadow); }
+      .snack-status[hidden] { display: none; }
+      .snack-status .spin { width: 17px; height: 17px; flex: none; border-radius: 50%; border: 2.5px solid var(--track); border-top-color: var(--ink-soft); animation: btn-spin .7s linear infinite; }
+      .snack-status.error { color: var(--danger); border-color: var(--danger); }
+      .snack-status.error .spin { display: none; }
+      #snackView.is-busy .pick-cat { opacity: .55; }
 
       /* 下部固定ボタンバー（トップ以外の画面） */
       .bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 55; background: var(--card); border-top: 1px solid var(--card-border); box-shadow: 0 -6px 20px rgba(120,70,60,.12); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
@@ -496,6 +506,11 @@
       .modal .pick .pick-kanako { background: var(--toki); }
       .modal .pick .pick-haha { background: var(--kotaro); }
       .modal .cancel { margin-top: 12px; width: 100%; border: none; background: transparent; color: var(--ink-soft); min-height: 44px; font-size: 15px; font-weight: 700; }
+      .pass-input-box { display: block; border: 2px solid var(--card-border); border-radius: 14px; padding: 0 14px; background: var(--card); }
+      .pass-input-box:focus-within { border-color: var(--ink-soft); }
+      .pass-input-box input { width: 100%; border: none; outline: none; background: transparent; color: var(--ink); font-size: 18px; padding: 12px 0; }
+      .modal .pass-save { border: none; border-radius: 14px; min-height: 56px; background: var(--ink); color: var(--bg); font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 19px; }
+      .modal .pass-save:active { transform: scale(.98); }
       .undo-detail { background: var(--bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px 16px; margin: 0 0 6px; }
       .undo-detail-main { display: flex; align-items: center; gap: 9px; font-size: 17px; font-weight: 900; line-height: 1.35; flex-wrap: wrap; }
       .undo-detail-main .ud-time { font-family: "Zen Maru Gothic",sans-serif; }
@@ -523,7 +538,7 @@
           <div class="giver-badge">このスマホ：<span id="giverName">未設定</span><button type="button" id="giverChange">変更</button></div>
         </div>
         <p class="guide-line">ごはんの目安は <b>7時・13時・21時</b> ／ 1日は朝4時から数えます</p>
-        <div class="sync-status" id="syncStatus" hidden><span id="syncStatusText">読み込み中…</span><button type="button" id="syncRetryBtn" hidden>再試行</button></div>
+        <div class="sync-status" id="syncStatus" hidden><span id="syncStatusText">読み込み中…</span><button type="button" id="syncRetryBtn" hidden>再試行</button><button type="button" id="syncPassBtn" hidden>合言葉を入れ直す</button></div>
         <div><span class="cache-notice" id="cacheNotice" hidden>前回の記録を表示中</span></div>
 
         <div class="cards">
@@ -615,6 +630,7 @@
           <span class="pick-check" aria-hidden="true">✓</span>
         </button>
         <button type="button" class="snack-ok-btn" id="snackOkBtn" disabled>OK</button>
+        <p class="snack-status" id="snackStatus" role="status" aria-live="polite" hidden><span class="spin" aria-hidden="true"></span><span id="snackStatusText">記録しています…</span></p>
       </div>
 
       <!-- ================= 履歴画面（日別） ================= -->
@@ -722,12 +738,30 @@
       </div>
     </div>
 
+    <div class="modal-back" id="passModal" role="dialog" aria-modal="true" aria-labelledby="passModalTitle">
+      <div class="modal">
+        <h2 id="passModalTitle">共有シートの合言葉</h2>
+        <p>記録を共有シートとつなぐための合言葉を、このスマホに1回だけ入力してください（Apps Scriptに設定した合言葉と同じものです）。合言葉はこのスマホの中だけに保存されます。</p>
+        <form id="passForm">
+          <label class="pass-input-box"><input id="passInput" type="password" autocomplete="off" placeholder="合言葉" aria-label="共有シートの合言葉" /></label>
+          <div class="form-msg" id="passMsg" role="alert"></div>
+          <div class="undo-actions">
+            <button type="submit" class="pass-save" id="passSaveBtn">保存してつなぐ</button>
+            <button type="button" class="undo-cancel" id="passCancelBtn">あとで</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
       'use strict';
       /* データの読み書きは DataStore に集約。本番版は Apps Script 橋渡し経由で共有スプレッドシートに接続する。
          「このスマホはだれのものか」の設定だけは端末内（localStorage）に保存し、シートには送らない */
       var BRIDGE_URL = 'https://script.google.com/macros/s/AKfycbx7jkDWgmS-5W-WUVJV4QwvrVW-BSeHxarepx8_OPp_gcBiOL8u-wT4QsuZFB1JnJ_e/exec';
-      var BRIDGE_PASS = 'nekomanma';
+      /* 合言葉はページのソースには書かない。端末ごとに1回入力してもらい、端末内（localStorage）だけに保存する */
+      var BRIDGE_PASS_KEY = 'neko-gohan-bridge-pass-v1';
+      function getBridgePass() { try { return localStorage.getItem(BRIDGE_PASS_KEY) || ''; } catch (e) { return ''; } }
+      function setBridgePass(v) { try { localStorage.setItem(BRIDGE_PASS_KEY, v); } catch (e) {} }
       function normalizeRecord(r) {
         var ts = typeof r.ts === 'number' ? r.ts : Date.parse(r.ts);
         return { id: String(r.id), ts: isNaN(ts) ? 0 : ts, cat: r.cat, kind: r.kind, grams: (r.grams === null || r.grams === undefined || r.grams === '') ? null : Number(r.grams), giver: r.giver || '' };
@@ -736,6 +770,7 @@
         return { id: String(r.id), ts: new Date(r.ts).toISOString(), cat: r.cat, kind: r.kind, grams: (r.grams === null || r.grams === undefined) ? null : Number(r.grams), giver: r.giver || '' };
       }
       function bridgePost(payload) {
+        if (!getBridgePass()) return Promise.reject(new Error('no bridge pass'));
         return fetch(BRIDGE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
           .then(function (res) { if (!res.ok) throw new Error('http ' + res.status); return res.json(); })
           .then(function (data) { if (!data || data.ok !== true) throw new Error('bridge error'); return data; });
@@ -756,7 +791,8 @@
           try { localStorage.setItem(this.CACHE_KEY, JSON.stringify(records.map(toWireRecord))); } catch (e) {}
         },
         fetchRecords: function () {
-          return fetch(BRIDGE_URL + '?pass=' + encodeURIComponent(BRIDGE_PASS) + '&action=list')
+          if (!getBridgePass()) return Promise.reject(new Error('no bridge pass'));
+          return fetch(BRIDGE_URL + '?pass=' + encodeURIComponent(getBridgePass()) + '&action=list')
             .then(function (res) { if (!res.ok) throw new Error('http ' + res.status); return res.json(); })
             .then(function (data) {
               if (!data || data.ok !== true || !Array.isArray(data.records)) throw new Error('bridge error');
@@ -764,10 +800,10 @@
             });
         },
         addRecord: function (record) {
-          return bridgePost({ pass: BRIDGE_PASS, action: 'add', record: toWireRecord(record) });
+          return bridgePost({ pass: getBridgePass(), action: 'add', record: toWireRecord(record) });
         },
         removeRecord: function (id) {
-          return bridgePost({ pass: BRIDGE_PASS, action: 'remove', id: String(id) });
+          return bridgePost({ pass: getBridgePass(), action: 'remove', id: String(id) });
         },
         getGiver: function () { try { return localStorage.getItem(this.GIVER_KEY) || ''; } catch (e) { return ''; } },
         setGiver: function (name) { try { localStorage.setItem(this.GIVER_KEY, name); } catch (e) {} }
@@ -998,7 +1034,7 @@
         state.snackSel = { toki: false, kotaro: false };
         document.getElementById('snackPickSub').textContent = '「' + KIND_LABEL[kind] + '」をあげる猫を選んでください（両方でもOK）';
         document.getElementById('homeView').hidden=true; document.getElementById('inputView').hidden=true; document.getElementById('historyView').hidden=true; document.getElementById('snackView').hidden=false; window.scrollTo(0,0);
-        renderSnackPick(); updateBottomBar();
+        hideSnackStatus(); renderSnackPick(); updateBottomBar();
       }
 
       /* ペコっと：押した瞬間にクラスを付けてアニメーションを再生する。連打時は再付与でリスタート */
@@ -1032,11 +1068,13 @@
         var box = document.getElementById('syncStatus');
         var label = document.getElementById('syncStatusText');
         var retry = document.getElementById('syncRetryBtn');
+        var passBtn = document.getElementById('syncPassBtn');
         if (mode === 'hide') { box.hidden = true; return; }
         box.hidden = false;
         box.classList.toggle('error', mode === 'error');
         label.textContent = text;
         retry.hidden = mode !== 'error';
+        if (passBtn) passBtn.hidden = mode !== 'error';
       }
       function refreshRecords(showLoading) {
         if (syncBusy) return Promise.resolve(false);
@@ -1056,7 +1094,7 @@
           /* 失敗時は今の表示（前回の表示があればそれ）をそのまま保ち、空表示には切り替えない。
              前回の表示が無い初回だけ、読み込み中表示を終えてエラー＋再試行に任せる */
           if (!state.showingCached) state.hasLoadedOnce = true;
-          setSyncStatus('error', '読み込めませんでした。通信を確認してください。');
+          setSyncStatus('error', getBridgePass() ? '読み込めませんでした。通信を確認してください。' : '合言葉が未設定です。合言葉を入力してください。');
           renderAll();
           return false;
         });
@@ -1106,15 +1144,19 @@
         msg.classList.add('info');
         msg.textContent = '記録しています…';
         DataStore.addRecord(newRecord(cat,'meal',grams)).then(function () {
+          /* 送信が終わっても、最新表示を取り直す間は「記録中…」とロックを維持する
+             （先に戻すと、画面遷移までの間ボタンが通常表示に戻り、固まったように見える） */
+          msg.classList.add('info');
+          msg.textContent = '記録しています…';
+          return refreshRecords(false);
+        }).then(function () {
           msg.classList.remove('info');
           msg.textContent = '';
           input.value = '';
-          resetChipState();
+          chipStack = [];
           setMealSaving(false);
-          return refreshRecords(false).then(function () {
-            showHome();
-            toast(CATS[cat].name + 'のごはん ' + fmtGrams(grams) + ' を記録しました');
-          });
+          showHome();
+          toast(CATS[cat].name + 'のごはん ' + fmtGrams(grams) + ' を記録しました');
         }).catch(function () {
           /* 失敗：ボタンを元に戻し、入力したグラムはそのまま残す */
           setMealSaving(false);
@@ -1176,16 +1218,32 @@
 
       function toggleSnackCat(cat) { state.snackSel[cat] = !state.snackSel[cat]; renderSnackPick(); }
 
+      /* おやつ画面側の処理中表示（ボタンだけでなく画面にも出す） */
+      function showSnackStatus(text, isError) {
+        var box = document.getElementById('snackStatus');
+        var label = document.getElementById('snackStatusText');
+        if (!box || !label) return;
+        box.hidden = false;
+        box.classList.toggle('error', !!isError);
+        label.textContent = text;
+      }
+      function hideSnackStatus() {
+        var box = document.getElementById('snackStatus');
+        if (box) { box.hidden = true; box.classList.remove('error'); }
+      }
+
       var snackSaving = false;
       function setSnackSaving(saving) {
         snackSaving = saving;
         var okBtn = document.getElementById('snackOkBtn');
+        document.getElementById('snackView').classList.toggle('is-busy', saving);
         if (saving) {
           if (!okBtn.dataset.label) okBtn.dataset.label = okBtn.textContent;
           okBtn.disabled = true;
           okBtn.classList.add('is-saving');
           okBtn.setAttribute('aria-busy', 'true');
           okBtn.textContent = '記録中…';
+          showSnackStatus('記録しています…', false);
           Array.prototype.forEach.call(document.querySelectorAll('[data-pick-cat]'), function (b) { b.disabled = true; });
           Array.prototype.forEach.call(document.querySelectorAll('#bottomBar .bottom-btn'), function (b) { b.disabled = true; });
         } else {
@@ -1207,18 +1265,29 @@
         try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {}
         var _sb = document.getElementById('snackOkBtn'); if (_sb && !_sb.classList.contains('is-peko')) triggerPeko(_sb);
         setSnackSaving(true);
+        var names = cats.map(function(c){ return CATS[c].name; }).join('と');
         var chain = Promise.resolve();
-        cats.forEach(function(cat){ chain = chain.then(function(){ return DataStore.addRecord(newRecord(cat, kind, null)); }); });
-        chain.then(function () {
-          state.pendingSnack = null;
-          var names = cats.map(function(c){ return CATS[c].name; }).join('と');
-          setSnackSaving(false);
-          return refreshRecords(false).then(function () {
-            showHome();
-            toast(names + 'に' + KIND_LABEL[kind] + ' を記録しました');
+        cats.forEach(function(cat, idx){
+          chain = chain.then(function(){
+            /* 選んだ猫の数だけ順に送る。何件目を送っているかを画面に出して、終わるまで処理中を維持する */
+            showSnackStatus('記録しています…（' + (idx + 1) + '／' + cats.length + ' 件目）', false);
+            return DataStore.addRecord(newRecord(cat, kind, null));
           });
+        });
+        chain.then(function () {
+          /* 全件送れた後も、最新表示を取り直す間は「記録中…」とロックを維持する。
+             ここで先に戻すと、画面が切り替わるまでの間ボタンが通常表示に戻り、固まったように見える */
+          showSnackStatus('記録を確認しています…', false);
+          return refreshRecords(false);
+        }).then(function () {
+          state.pendingSnack = null;
+          setSnackSaving(false);
+          hideSnackStatus();
+          showHome();
+          toast(names + 'に' + KIND_LABEL[kind] + ' を記録しました');
         }).catch(function () {
           setSnackSaving(false);
+          showSnackStatus('記録できませんでした。通信を確認して、もう一度OKを押してください', true);
           toast('記録できませんでした。通信を確認して、もう一度押してください');
         });
       }
@@ -1263,11 +1332,12 @@
         try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {}
         setUndoDeleting(true);
         DataStore.removeRecord(latest.id).then(function () {
+          /* 取り直しの間も「消しています…」とロックを維持する */
+          return refreshRecords(false);
+        }).then(function () {
           setUndoDeleting(false);
           closeUndoConfirm();
-          return refreshRecords(false).then(function () {
-            toast('取り消しました：' + fmtTimeShort(latest.ts) + ' ' + describeRecord(latest));
-          });
+          toast('取り消しました：' + fmtTimeShort(latest.ts) + ' ' + describeRecord(latest));
         }).catch(function () {
           setUndoDeleting(false);
           closeUndoConfirm();
@@ -1292,6 +1362,10 @@
       function openGiverModal(canCancel) { modal.classList.add('open'); document.getElementById('giverCancel').style.display = canCancel ? 'block' : 'none'; }
       function closeGiverModal() { modal.classList.remove('open'); }
 
+      var passModal = document.getElementById('passModal');
+      function openPassModal(canCancel) { passModal.classList.add('open'); document.getElementById('passCancelBtn').style.display = canCancel ? 'block' : 'none'; }
+      function closePassModal() { passModal.classList.remove('open'); }
+
       function init() {
         var now = new Date();
         document.getElementById('todayDate').textContent = (now.getMonth()+1) + '月' + now.getDate() + '日';
@@ -1310,7 +1384,9 @@
         renderAll();
         setSyncStatus('loading', '読み込み中…');
         refreshRecords(true);
-        if (!state.giver) openGiverModal(false);
+        /* 合言葉が未設定なら、まず合言葉の入力を優先する（そのあとで「だれのスマホか」を聞く） */
+        if (!getBridgePass()) openPassModal(false);
+        else if (!state.giver) openGiverModal(false);
 
         document.getElementById('card-toki').addEventListener('click', function(){ showInput('toki'); });
         document.getElementById('card-kotaro').addEventListener('click', function(){ showInput('kotaro'); });
@@ -1318,15 +1394,15 @@
         document.getElementById('bottomHistoryBtn').addEventListener('click', function(){ if (state.view !== 'history') showHistory(); });
         Array.prototype.forEach.call(document.querySelectorAll('[data-snack]'), function(btn){ btn.addEventListener('click', function(){ showSnackPick(btn.getAttribute('data-snack')); }); });
         Array.prototype.forEach.call(document.querySelectorAll('[data-pick-cat]'), function(btn){ btn.addEventListener('click', function(){ toggleSnackCat(btn.getAttribute('data-pick-cat')); }); });
-        bindPeko(document.getElementById('recordBtn'));
-        bindPeko(document.getElementById('snackOkBtn'));
+        /* ペコっとは全ボタンに付ける：猫カード、おやつ、猫えらび、チップ、取り消し、履歴、下部バー、変更、再試行、モーダル内ボタンまで */
+        Array.prototype.forEach.call(document.querySelectorAll('button'), function(b){ bindPeko(b); });
         document.getElementById('snackOkBtn').addEventListener('click', submitSnackSelected);
         document.getElementById('historyLinkBtn').addEventListener('click', showHistory);
         document.getElementById('homeUndoBtn').addEventListener('click', undoHomeLast);
         updateBottomBar();
 
         document.getElementById('mealForm').addEventListener('submit', submitMeal);
-        Array.prototype.forEach.call(document.querySelectorAll('.chips button'), function(btn){ bindPeko(btn); btn.addEventListener('click', function(){ addChip(parseFloat(btn.getAttribute('data-add'))); }); });
+        Array.prototype.forEach.call(document.querySelectorAll('.chips button'), function(btn){ btn.addEventListener('click', function(){ addChip(parseFloat(btn.getAttribute('data-add'))); }); });
         document.getElementById('chipUndoBtn').addEventListener('click', undoChip);
         document.getElementById('chipClearBtn').addEventListener('click', clearGrams);
         document.getElementById('gramsInput').addEventListener('input', function(){ chipStack = []; updateChipTools(); });
@@ -1338,7 +1414,22 @@
         document.getElementById('giverChange').addEventListener('click', function(){ openGiverModal(true); });
         document.getElementById('giverCancel').addEventListener('click', closeGiverModal);
         Array.prototype.forEach.call(modal.querySelectorAll('[data-giver]'), function(btn){ btn.addEventListener('click', function(){ state.giver = btn.getAttribute('data-giver'); DataStore.setGiver(state.giver); closeGiverModal(); renderGiver(); toast('このスマホは「' + state.giver + '」に設定しました'); }); });
-        document.getElementById('syncRetryBtn').addEventListener('click', function(){ refreshRecords(true); });
+        document.getElementById('syncRetryBtn').addEventListener('click', function(){ if (!getBridgePass()) { openPassModal(true); return; } refreshRecords(true); });
+        document.getElementById('syncPassBtn').addEventListener('click', function(){ openPassModal(true); });
+        document.getElementById('passCancelBtn').addEventListener('click', closePassModal);
+        document.getElementById('passForm').addEventListener('submit', function(ev){
+          ev.preventDefault();
+          var v = document.getElementById('passInput').value.trim();
+          var pmsg = document.getElementById('passMsg');
+          if (!v) { pmsg.textContent = '合言葉を入力してください'; return; }
+          setBridgePass(v);
+          document.getElementById('passInput').value = '';
+          pmsg.textContent = '';
+          closePassModal();
+          toast('合言葉を保存しました');
+          refreshRecords(true);
+          if (!state.giver) openGiverModal(false);
+        });
         setInterval(function(){ renderAll(); refreshRecords(false); }, 60000);
       }
       document.addEventListener('DOMContentLoaded', init);
