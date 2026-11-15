@@ -77,16 +77,18 @@
       button, input { font-family: inherit; }
       button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
       img { display: block; }
-      .wrap { max-width: 620px; margin: 0 auto; padding: 10px 12px 16px; }
+      .wrap { max-width: 620px; margin: 0 auto; padding: 10px 12px 16px; overflow-x: clip; }
+      body { overflow-x: clip; }
       [hidden] { display: none !important; }
 
       /* ヘッダー */
-      .today-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-      .today-date { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 23px; white-space: nowrap; }
-      .today-date .dow { font-size: 15px; color: var(--ink-soft); font-weight: 700; }
-      .giver-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--card-border); border-radius: 999px; padding: 4px 4px 4px 12px; font-size: 13px; font-weight: 700; box-shadow: var(--shadow); white-space: nowrap; }
-      .giver-badge button { border: none; background: var(--toki-soft); color: var(--ink); border-radius: 999px; min-height: 32px; padding: 4px 12px; font-size: 12.5px; font-weight: 700; }
-      .guide-line { margin: 4px 2px 0; color: var(--ink-faint); font-size: 12px; }
+      .today-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; min-width: 0; max-width: 100%; }
+      .today-date { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 23px; white-space: normal; overflow-wrap: anywhere; line-height: 1.2; min-width: 0; }
+      .today-date .dow { font-size: 15px; color: var(--ink-soft); font-weight: 700; white-space: nowrap; }
+      .giver-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--card-border); border-radius: 999px; padding: 4px 4px 4px 10px; font-size: 13px; font-weight: 700; box-shadow: var(--shadow); white-space: normal; overflow-wrap: anywhere; flex-wrap: wrap; max-width: 100%; min-width: 0; line-height: 1.3; }
+      .giver-badge #giverName { overflow-wrap: anywhere; min-width: 0; }
+      .giver-badge button { border: none; background: var(--toki-soft); color: var(--ink); border-radius: 999px; min-height: 32px; padding: 4px 12px; font-size: 12.5px; font-weight: 700; flex: none; white-space: nowrap; }
+      .guide-line { margin: 4px 2px 0; color: var(--ink-faint); font-size: 12px; overflow-wrap: anywhere; line-height: 1.5; }
       .guide-line b { color: var(--ink-soft); }
 
       /* カード：通常フローの縦積みのみ。はみ出し・重なりを作る指定は使わない */
@@ -138,25 +140,25 @@
 
       /* おやつ（トップ） */
       .section-label { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 16px; margin: 16px 2px 8px; }
-      .snack-row { display: flex; gap: 10px; }
-      .snack-btn { flex: 1; border-radius: 16px; min-height: 58px; font-size: 18px; font-weight: 900; font-family: "Zen Maru Gothic",sans-serif; display: flex; align-items: center; justify-content: center; gap: 9px; color: var(--ink); }
+      .snack-row { display: flex; gap: 10px; flex-wrap: wrap; min-width: 0; max-width: 100%; }
+      .snack-btn { flex: 1 1 120px; min-width: 0; border-radius: 16px; min-height: 58px; font-size: 18px; font-weight: 900; font-family: "Zen Maru Gothic",sans-serif; display: flex; align-items: center; justify-content: center; gap: 9px; color: var(--ink); overflow-wrap: anywhere; text-align: center; line-height: 1.3; padding: 8px 6px; }
       .snack-btn.churu { background: var(--snack-churu); border: 2px solid var(--toki-border); }
       .snack-btn.katsuo { background: var(--snack-katsuo); border: 2px solid #ecc987; }
       @media (prefers-color-scheme: dark) { .snack-btn.katsuo { border-color: #8a6c2e; } }
       .snack-btn:active { transform: scale(.97); }
 
       /* 最近の記録 */
-      .recent-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 2px 8px; }
-      .recent-title { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 16px; }
-      .undo-mini { border: 1px solid var(--card-border); background: var(--card); color: var(--danger); border-radius: 999px; min-height: 36px; padding: 4px 14px; font-size: 13px; font-weight: 700; box-shadow: var(--shadow); }
+      .recent-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 16px 2px 8px; flex-wrap: wrap; min-width: 0; max-width: 100%; }
+      .recent-title { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 16px; min-width: 0; }
+      .undo-mini { border: 1px solid var(--card-border); background: var(--card); color: var(--danger); border-radius: 999px; min-height: 36px; padding: 4px 14px; font-size: 13px; font-weight: 700; box-shadow: var(--shadow); flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; white-space: normal; line-height: 1.3; text-align: center; }
       .undo-mini:disabled { color: var(--ink-faint); box-shadow: none; }
-      .recent-list { list-style: none; margin: 0; padding: 6px 8px; background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: var(--shadow); }
-      .recent-item { display: flex; align-items: center; gap: 9px; padding: 7px 6px; font-size: 14.5px; }
+      .recent-list { list-style: none; margin: 0; padding: 6px 8px; background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: var(--shadow); max-width: 100%; overflow: hidden; }
+      .recent-item { display: flex; align-items: center; gap: 7px; padding: 7px 6px; font-size: 14.5px; flex-wrap: wrap; min-width: 0; max-width: 100%; line-height: 1.35; }
       .recent-item + .recent-item { border-top: 1px solid var(--track); }
-      .recent-item .r-cat { font-weight: 900; min-width: 52px; }
-      .recent-item .r-time { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; min-width: 46px; }
-      .recent-item .r-what { flex: 1; font-weight: 700; }
-      .recent-item .r-who { color: var(--ink-soft); font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+      .recent-item .r-cat { font-weight: 900; flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; }
+      .recent-item .r-time { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; flex: none; white-space: nowrap; }
+      .recent-item .r-what { flex: 1 1 90px; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+      .recent-item .r-who { color: var(--ink-soft); font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; white-space: normal; overflow-wrap: anywhere; flex: 0 1 auto; min-width: 0; }
       .recent-item .r-who svg { flex: none; }
       .recent-empty { background: var(--card); border: 1px dashed var(--card-border); border-radius: 16px; padding: 14px; text-align: center; color: var(--ink-faint); font-size: 14px; }
       .footnote { margin: 12px 0 0; text-align: center; color: var(--ink-faint); font-size: 11.5px; line-height: 1.6; }
@@ -213,9 +215,9 @@
       #homeView .recent-title { font-size: 14px; }
       #homeView .undo-mini { min-height: 30px; padding: 2px 11px; font-size: 12px; }
       #homeView .recent-list { padding: 3px 6px; border-radius: 14px; }
-      #homeView .recent-item { gap: 7px; padding: 3px 4px; font-size: 13.5px; line-height: 1.3; }
-      #homeView .recent-item .r-cat { min-width: 44px; }
-      #homeView .recent-item .r-time { min-width: 40px; }
+      #homeView .recent-item { gap: 6px; padding: 3px 4px; font-size: 13.5px; line-height: 1.3; }
+      #homeView .recent-item .r-cat { min-width: 0; }
+      #homeView .recent-item .r-time { min-width: 0; }
       #homeView .recent-item .r-who { font-size: 12px; }
       #homeView .recent-empty { padding: 9px; font-size: 13px; }
       #homeView .history-link-btn { margin-top: 8px; min-height: 40px; padding: 6px 14px; font-size: 14px; }
@@ -252,13 +254,37 @@
       .record-btn { flex: 1; border: none; border-radius: 14px; min-height: 62px; font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 20px; color: #fff; }
       .record-btn.toki { background: var(--toki); }
       .record-btn.kotaro { background: var(--kotaro); }
-      .record-btn:active { transform: scale(.98); }
+      .record-btn:active { transform: scale(.94,.92); }
+      .record-btn:disabled { cursor: default; opacity: .82; }
+      .record-btn.is-saving { transform: scale(.97); filter: brightness(.88) saturate(1.15); box-shadow: inset 0 3px 8px rgba(0,0,0,.22); opacity: 1; }
+      .record-btn.is-saving::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.45); border-top-color: #fff; animation: btn-spin .7s linear infinite; }
+      @keyframes btn-spin { to { transform: rotate(360deg); } }
+      /* ペコっとアニメーション：押した瞬間に沈んで弾んで戻る（通信結果とは無関係に必ず再生） */
+      @keyframes peko-press {
+        0% { transform: scale(1,1) translateY(0); }
+        28% { transform: scale(.93,.88) translateY(2px); }
+        52% { transform: scale(1.03,1.04) translateY(-1px); }
+        72% { transform: scale(.99,.99) translateY(0); }
+        100% { transform: scale(1,1) translateY(0); }
+      }
+      @keyframes peko-chip {
+        0% { transform: scale(1,1) translateY(0); }
+        30% { transform: scale(.90,.86) translateY(1.5px); }
+        58% { transform: scale(1.04,1.05) translateY(-.5px); }
+        78% { transform: scale(.99,1) translateY(0); }
+        100% { transform: scale(1,1) translateY(0); }
+      }
+      .record-btn.is-peko, .snack-ok-btn.is-peko { animation: peko-press .28s cubic-bezier(.34,1.4,.64,1) both; will-change: transform; }
+      .chips button.is-peko { animation: peko-chip .24s cubic-bezier(.34,1.4,.64,1) both; will-change: transform; }
+      /* is-saving 中でもペコが分かるよう、保存中の縮みよりアニメーションを優先する */
+      .record-btn.is-saving.is-peko, .snack-ok-btn.is-saving.is-peko { animation: peko-press .28s cubic-bezier(.34,1.4,.64,1) both; }
+      @media (prefers-reduced-motion: reduce) { .record-btn.is-saving::before, .snack-ok-btn.is-saving::before, .modal .undo-delete.is-deleting::before { animation: none; } .record-btn.is-peko, .snack-ok-btn.is-peko, .chips button.is-peko { animation: none; } }
       /* 足し算チップ：3個×2段のグリッド。押すたびにその数字が今の入力値に足される */
       .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
       .chips button { border: 1.5px solid var(--card-border); background: var(--bg); color: var(--ink); border-radius: 14px; min-height: 48px; padding: 4px 6px; font-size: 19px; font-weight: 900; font-family: "Zen Maru Gothic",sans-serif; }
       .input-card.toki .chips button { border-color: var(--toki-border); background: var(--toki-soft); }
       .input-card.kotaro .chips button { border-color: var(--kotaro-border); background: var(--kotaro-soft); }
-      .chips button:active { transform: scale(.96); }
+      .chips button:active { transform: scale(.92,.90); }
       .chip-tools { display: flex; align-items: center; gap: 8px; margin-top: 8px; min-height: 36px; }
       .chip-expr { flex: 1 1 0; min-width: 0; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); line-height: 1.35; }
       .chip-tools-btns { display: flex; gap: 7px; flex: none; }
@@ -267,6 +293,7 @@
       .chip-tool-btn:disabled { color: var(--ink-faint); box-shadow: none; }
       .chip-tool-btn:active { transform: scale(.97); }
       .form-msg { min-height: 20px; font-size: 13px; font-weight: 700; color: var(--danger); margin-top: 6px; }
+      .form-msg.info { color: var(--ink-soft); }
       .history-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 22px; }
       .history-title { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 18px; }
       .undo-btn { border: 1px solid var(--card-border); background: var(--card); color: var(--danger); border-radius: 999px; min-height: 42px; padding: 6px 16px; font-size: 14.5px; font-weight: 700; box-shadow: var(--shadow); }
@@ -363,7 +390,10 @@
       .pick-cat.kotaro.selected .pick-check { background: var(--kotaro); border-color: var(--kotaro); color: #fff; }
       .snack-ok-btn { width: 100%; margin-top: 14px; border: none; border-radius: 14px; min-height: 58px; font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 20px; background: var(--ink); color: var(--bg); }
       .snack-ok-btn:disabled { opacity: .35; }
-      .snack-ok-btn:active { transform: scale(.98); }
+      .snack-ok-btn:active { transform: scale(.94,.92); }
+      .snack-ok-btn.is-saving:disabled { opacity: 1; cursor: default; }
+      .snack-ok-btn.is-saving { transform: scale(.97); filter: brightness(.85); box-shadow: inset 0 3px 8px rgba(0,0,0,.25); }
+      .snack-ok-btn.is-saving::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.4); border-top-color: currentColor; animation: btn-spin .7s linear infinite; }
 
       /* 下部固定ボタンバー（トップ以外の画面） */
       .bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 55; background: var(--card); border-top: 1px solid var(--card-border); box-shadow: 0 -6px 20px rgba(120,70,60,.12); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
@@ -382,26 +412,34 @@
       #homeView .cat-card.toki { background: var(--toki-soft); }
       #homeView .cat-card.kotaro { background: var(--kotaro-soft); }
       #homeView .cat-card.recent { border-color: #ed7a12; box-shadow: inset 0 0 0 1.5px #ed7a12, var(--shadow); }
-      .hc { display: flex; gap: 12px; align-items: stretch; width: 100%; }
-      .cat-photo-home { width: 102px; flex: none; align-self: stretch; min-height: 122px; border-radius: 14px; object-fit: cover; }
-      .hc-main { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
-      .hc-top { display: flex; align-items: center; gap: 6px; width: 100%; flex-wrap: wrap; row-gap: 4px; }
-      .hc-namewrap { display: inline-flex; align-items: center; gap: 5px; flex: none; min-width: 0; }
+      .hc { display: flex; gap: 8px; align-items: flex-start; width: 100%; min-width: 0; max-width: 100%; }
+      /* 写真は標準で約102×122px（実機表示どおり・比率51:61で固定）。
+         文字カラム（.hc-main）は min-content まで縮まないため、画面が狭い／文字が大きい端末では
+         溢れた分だけ写真が flex-shrink で縮む。その際も aspect-ratio が固定なので縦横同じ割合で縮み、
+         横だけ細くなったりトリミング範囲が変わったりしない。下限54px（高さ約65px） */
+      .cat-photo-home { width: 102px; flex: 0 1 102px; min-width: 54px; aspect-ratio: 51 / 61; height: auto; align-self: flex-start; border-radius: 14px; object-fit: cover; object-position: center; }
+      .hc-main { flex: 1 1 0; min-width: min-content; max-width: 100%; display: flex; flex-direction: column; gap: 7px; overflow: hidden; }
+      .hc-top { display: flex; align-items: center; gap: 6px; width: 100%; flex-wrap: wrap; row-gap: 4px; min-width: 0; }
+      .hc-namewrap { display: inline-flex; align-items: center; gap: 5px; flex: 0 1 auto; min-width: 0; }
       #homeView .hc-namewrap .cat-name { font-size: 20px; }
-      #homeView .recent-badge { background: #ed7a12; font-size: 10.5px; padding: 3px 8px; gap: 3px; letter-spacing: -.02em; max-width: 100%; margin-left: auto; }
-      .hc-cols { display: flex; align-items: stretch; gap: 10px; flex: 1; width: 100%; }
-      .hc-left { flex: 1.15 1 0; min-width: 0; display: flex; flex-direction: column; }
-      .hc-right { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+      #homeView .recent-badge { background: #ed7a12; font-size: 10.5px; padding: 3px 8px; gap: 3px; letter-spacing: -.02em; max-width: 100%; margin-left: auto; flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; }
+      .hc-cols { display: flex; align-items: stretch; gap: 8px; flex: 1; width: 100%; min-width: 0; max-width: 100%; }
+      /* 左右カラムは文字の最小幅（時刻・グラム等の改行できない塊）を確保する。写真より先に文字が場所を取り、写真が残り幅に合わせて縮む */
+      .hc-left { flex: 1 1 0; min-width: min-content; max-width: 100%; display: flex; flex-direction: column; overflow: hidden; }
+      .hc-right { flex: 1.08 1 0; min-width: min-content; max-width: 100%; display: flex; flex-direction: column; overflow: hidden; }
       .hc-divider { width: 1px; flex: none; margin: 2px 0; }
       .cat-card.toki .hc-divider { background: var(--toki-border); }
       .cat-card.kotaro .hc-divider { background: var(--kotaro-border); }
-      .hc-time { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 37px; line-height: 1.1; white-space: nowrap; }
-      .hc-grams { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 37px; line-height: 1.1; white-space: nowrap; text-align: center; }
-      .hc-left-sub { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; margin-top: 5px; }
-      .hc-total { display: flex; align-items: baseline; gap: 4px; white-space: nowrap; margin-top: 6px; font-size: 12.5px; font-weight: 700; color: var(--ink-soft); }
-      .hc-total-num { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 15px; color: var(--ink); }
-      .hc-bar { display: block; width: 100%; margin-top: 4px; }
-      .hc-goal { display: block; text-align: center; font-size: 11px; color: var(--ink-soft); font-weight: 700; margin-top: 3px; white-space: nowrap; }
+      .hc-time { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 37px; line-height: 1.1; white-space: nowrap; letter-spacing: -.01em; max-width: 100%; }
+      .hc-grams { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 37px; line-height: 1.1; white-space: nowrap; text-align: center; letter-spacing: -.01em; max-width: 100%; }
+      .hc-left-sub { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; margin-top: 5px; min-width: 0; max-width: 100%; flex-wrap: wrap; }
+      .hc-left-sub .last-ago, .hc-left-sub .last-giver { max-width: 100%; }
+      .hc-left-sub .giver-tag { flex-wrap: wrap; white-space: normal; overflow-wrap: anywhere; }
+      .hc-total { display: flex; align-items: baseline; gap: 2px 4px; flex-wrap: wrap; white-space: normal; margin-top: 6px; font-size: 12.5px; font-weight: 700; color: var(--ink-soft); line-height: 1.35; min-width: 0; max-width: 100%; }
+      .hc-total-label { white-space: nowrap; flex: none; }
+      .hc-total-num { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 15px; color: var(--ink); white-space: nowrap; flex: none; }
+      .hc-bar { display: block; width: 100%; max-width: 100%; margin-top: 4px; }
+      .hc-goal { display: block; text-align: center; font-size: 11px; color: var(--ink-soft); font-weight: 700; margin-top: 3px; white-space: normal; overflow-wrap: anywhere; line-height: 1.4; min-width: 0; max-width: 100%; }
       .hc-right .total-over { margin-top: 2px; font-size: 11px; text-align: center; }
       /* 未記録表示：2列に押し込むと、実機の幅広フォントや大きい文字設定では
          「まだ食べてない」が左列をはみ出して区切り線に重なる。
@@ -417,7 +455,33 @@
       #homeView .cat-card.is-empty .hc-goal { order: 2; text-align: left; margin-top: 0; }
       #homeView .cat-card.is-empty .hc-bar { order: 3; flex: 1 1 100%; margin-top: 2px; }
       #homeView .cat-card.is-empty .hc-right .total-over { order: 4; flex: 1 1 100%; text-align: left; margin-top: 1px; }
-      .hc-empty-sub { display: block; font-size: 11.5px; color: var(--ink-soft); line-height: 1.45; font-weight: 700; }
+      .hc-empty-sub { display: block; font-size: 11.5px; color: var(--ink-soft); line-height: 1.45; font-weight: 700; overflow-wrap: anywhere; max-width: 100%; }
+      .hc-right .total-over { white-space: normal; overflow-wrap: anywhere; line-height: 1.35; max-width: 100%; }
+      /* 文字拡大・狭幅でも見切れないための最終ガード：
+         文字サイズは下げない。まず写真が比率を保って縮んで文字の横幅を確保し、
+         それでも入らない場合だけ合計・目標を改行して収める */
+      #homeView .cat-card { max-width: 100%; overflow: hidden; }
+      #homeView .last-ago { white-space: normal; overflow-wrap: anywhere; text-align: center; line-height: 1.3; max-width: 100%; }
+      #homeView .footnote { overflow-wrap: anywhere; }
+      #homeView .history-link-btn { overflow-wrap: anywhere; white-space: normal; line-height: 1.4; }
+      /* 狭幅でも写真の固定縮小はしない（標準幅では従来どおり102px）。
+         狭さ・文字拡大への対応は上の flex 構造（文字が場所を取り、写真が比率を保って縮む）が担う */
+      @media (max-width: 390px) {
+        .hc-total { justify-content: flex-start; }
+        .hc-right { align-items: stretch; }
+        .hc-grams { text-align: center; }
+      }
+      @media (max-width: 340px) {
+        /* 最終フォールバック：写真が下限まで縮んでも入らない極端な狭幅では、
+           文字サイズは下げず、左右カラムを縦積みにして時刻・グラムも見切れないようにする */
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-cols { flex-wrap: wrap; gap: 4px 0; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-left,
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-right { flex: 1 1 100%; }
+        #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-divider { display: none; }
+        .hc-total-label { white-space: normal; overflow-wrap: anywhere; flex: 0 1 auto; }
+        .hc-goal { white-space: normal; overflow-wrap: anywhere; }
+        #homeView .recent-badge { white-space: normal; overflow-wrap: anywhere; text-align: center; line-height: 1.3; }
+      }
 
       .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translate(-50%,80px); z-index: 60; background: var(--ink); color: var(--bg); font-weight: 700; font-size: 15.5px; border-radius: 999px; padding: 12px 22px; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; pointer-events: none; transition: transform .25s ease, opacity .25s ease; max-width: calc(100vw - 32px); text-align: center; }
       .toast.show { transform: translate(-50%,0); opacity: 1; }
@@ -441,6 +505,9 @@
       .modal .undo-actions { display: grid; gap: 10px; margin-top: 16px; }
       .modal .undo-delete { border: none; border-radius: 14px; min-height: 56px; background: var(--danger); color: #fff; font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 19px; }
       .modal .undo-delete:active { transform: scale(.98); }
+      .modal .undo-delete:disabled { cursor: default; }
+      .modal .undo-delete.is-deleting { transform: scale(.97); filter: brightness(.85); box-shadow: inset 0 3px 8px rgba(0,0,0,.25); }
+      .modal .undo-delete.is-deleting::before { content: ""; display: inline-block; width: 15px; height: 15px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; animation: btn-spin .7s linear infinite; }
       .modal .undo-cancel { border: 1px solid var(--card-border); border-radius: 14px; min-height: 52px; background: var(--card); color: var(--ink); font-weight: 700; font-size: 16px; }
       .modal .undo-cancel:active { transform: scale(.98); }
       @media (prefers-reduced-motion: reduce) { .bar > i, .toast { transition: none; } }
@@ -479,7 +546,7 @@
                   <span class="hc-divider" aria-hidden="true"></span>
                   <span class="hc-right">
                     <span class="hc-grams" id="tokiCardGrams">—</span>
-                    <span class="hc-total">今日の合計 <span class="hc-total-num" id="tokiCardTotal">0g</span></span>
+                    <span class="hc-total"><span class="hc-total-label">今日の合計</span><span class="hc-total-num" id="tokiCardTotal">0g</span></span>
                     <span class="bar hc-bar" aria-hidden="true"><i id="tokiCardBar" style="width:0%"></i></span>
                     <span class="hc-goal" id="tokiCardGoalLine">目標 40g（0%）</span>
                     <span class="total-over" id="tokiCardOver" hidden>目標を超えています</span>
@@ -508,7 +575,7 @@
                   <span class="hc-divider" aria-hidden="true"></span>
                   <span class="hc-right">
                     <span class="hc-grams" id="kotaroCardGrams">—</span>
-                    <span class="hc-total">今日の合計 <span class="hc-total-num" id="kotaroCardTotal">0g</span></span>
+                    <span class="hc-total"><span class="hc-total-label">今日の合計</span><span class="hc-total-num" id="kotaroCardTotal">0g</span></span>
                   </span>
                 </span>
               </span>
@@ -934,6 +1001,28 @@
         renderSnackPick(); updateBottomBar();
       }
 
+      /* ペコっと：押した瞬間にクラスを付けてアニメーションを再生する。連打時は再付与でリスタート */
+      function triggerPeko(el) {
+        if (!el || el.disabled) return;
+        el.classList.remove('is-peko');
+        /* reflow を挟んでアニメーションを確実に最初から再生する */
+        void el.offsetWidth;
+        el.classList.add('is-peko');
+        var onEnd = function (ev) {
+          if (ev.animationName !== 'peko-press' && ev.animationName !== 'peko-chip') return;
+          el.classList.remove('is-peko');
+          el.removeEventListener('animationend', onEnd);
+        };
+        el.addEventListener('animationend', onEnd);
+        /* animationend が来ない環境向けの保険（0.35秒で掃除） */
+        setTimeout(function () { el.classList.remove('is-peko'); }, 360);
+      }
+      function bindPeko(el) {
+        if (!el) return;
+        /* pointerdown が一番早い。click はキーボード操作などの保険 */
+        el.addEventListener('pointerdown', function () { triggerPeko(el); }, { passive: true });
+      }
+
       var toastTimer = null;
       function toast(msg) { var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){ el.classList.remove('show'); },2600); }
 
@@ -975,30 +1064,62 @@
 
       function newRecord(cat, kind, grams) { return { id: 'r'+Date.now().toString(36)+Math.floor(Math.random()*100000).toString(36), ts: Date.now(), cat: cat, kind: kind, grams: grams, giver: state.giver }; }
 
+      var mealSaving = false;
+      function setMealSaving(saving) {
+        mealSaving = saving;
+        var btn = document.getElementById('recordBtn');
+        var input = document.getElementById('gramsInput');
+        if (saving) {
+          if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+          btn.disabled = true;
+          btn.classList.add('is-saving');
+          btn.setAttribute('aria-busy', 'true');
+          btn.textContent = '記録中…';
+          if (input) input.disabled = true;
+          Array.prototype.forEach.call(document.querySelectorAll('.chips button, .chip-tool-btn'), function (b) { b.disabled = true; });
+          Array.prototype.forEach.call(document.querySelectorAll('#bottomBar .bottom-btn'), function (b) { b.disabled = true; });
+        } else {
+          btn.disabled = false;
+          btn.classList.remove('is-saving');
+          btn.removeAttribute('aria-busy');
+          btn.textContent = btn.dataset.label || 'ごはん記録';
+          if (input) input.disabled = false;
+          Array.prototype.forEach.call(document.querySelectorAll('.chips button'), function (b) { b.disabled = false; });
+          Array.prototype.forEach.call(document.querySelectorAll('#bottomBar .bottom-btn'), function (b) { b.disabled = false; });
+          updateBottomBar();
+          updateChipTools();
+        }
+      }
       function submitMeal(ev) {
         ev.preventDefault();
-        if (syncBusy) return;
+        if (mealSaving) return;
         var cat = state.currentCat, input = document.getElementById('gramsInput'), msg = document.getElementById('formMsg');
         var grams = parseFloat(input.value);
         if (!state.giver) { openGiverModal(false); return; }
+        msg.classList.remove('info');
         if (isNaN(grams) || grams <= 0) { msg.textContent='食べた量（グラム）を入れてください'; input.focus(); return; }
         if (grams > 200) { msg.textContent='量が大きすぎます。確認してください'; input.focus(); return; }
-        msg.textContent='';
-        var btn = document.getElementById('recordBtn');
-        btn.disabled = true;
-        setSyncStatus('loading', '送信中…');
+        /* 押した瞬間にフィードバック：通信を待たず、この場でボタンを「記録中…」に切り替える */
+        try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {}
+        var _rb = document.getElementById('recordBtn'); if (_rb && !_rb.classList.contains('is-peko')) triggerPeko(_rb);
+        setMealSaving(true);
+        msg.classList.add('info');
+        msg.textContent = '記録しています…';
         DataStore.addRecord(newRecord(cat,'meal',grams)).then(function () {
-          btn.disabled = false;
-          input.value='';
+          msg.classList.remove('info');
+          msg.textContent = '';
+          input.value = '';
           resetChipState();
+          setMealSaving(false);
           return refreshRecords(false).then(function () {
             showHome();
             toast(CATS[cat].name + 'のごはん ' + fmtGrams(grams) + ' を記録しました');
           });
         }).catch(function () {
-          btn.disabled = false;
-          setSyncStatus('hide');
-          msg.textContent='送信できませんでした。通信を確認して、もう一度お試しください';
+          /* 失敗：ボタンを元に戻し、入力したグラムはそのまま残す */
+          setMealSaving(false);
+          msg.classList.remove('info');
+          msg.textContent = '記録できませんでした。通信を確認して、もう一度押してください';
         });
       }
 
@@ -1055,26 +1176,50 @@
 
       function toggleSnackCat(cat) { state.snackSel[cat] = !state.snackSel[cat]; renderSnackPick(); }
 
+      var snackSaving = false;
+      function setSnackSaving(saving) {
+        snackSaving = saving;
+        var okBtn = document.getElementById('snackOkBtn');
+        if (saving) {
+          if (!okBtn.dataset.label) okBtn.dataset.label = okBtn.textContent;
+          okBtn.disabled = true;
+          okBtn.classList.add('is-saving');
+          okBtn.setAttribute('aria-busy', 'true');
+          okBtn.textContent = '記録中…';
+          Array.prototype.forEach.call(document.querySelectorAll('[data-pick-cat]'), function (b) { b.disabled = true; });
+          Array.prototype.forEach.call(document.querySelectorAll('#bottomBar .bottom-btn'), function (b) { b.disabled = true; });
+        } else {
+          okBtn.classList.remove('is-saving');
+          okBtn.removeAttribute('aria-busy');
+          okBtn.textContent = okBtn.dataset.label || 'OK';
+          Array.prototype.forEach.call(document.querySelectorAll('[data-pick-cat]'), function (b) { b.disabled = false; });
+          Array.prototype.forEach.call(document.querySelectorAll('#bottomBar .bottom-btn'), function (b) { b.disabled = false; });
+          updateBottomBar();
+          renderSnackPick();
+        }
+      }
       function submitSnackSelected() {
-        if (syncBusy) return;
+        if (snackSaving) return;
         var kind = state.pendingSnack;
         var cats = ['toki','kotaro'].filter(function(c){ return state.snackSel[c]; });
         if (!kind || !cats.length) return;
         if (!state.giver) { openGiverModal(false); return; }
-        var okBtn = document.getElementById('snackOkBtn');
-        okBtn.disabled = true;
+        try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {}
+        var _sb = document.getElementById('snackOkBtn'); if (_sb && !_sb.classList.contains('is-peko')) triggerPeko(_sb);
+        setSnackSaving(true);
         var chain = Promise.resolve();
         cats.forEach(function(cat){ chain = chain.then(function(){ return DataStore.addRecord(newRecord(cat, kind, null)); }); });
         chain.then(function () {
           state.pendingSnack = null;
           var names = cats.map(function(c){ return CATS[c].name; }).join('と');
+          setSnackSaving(false);
           return refreshRecords(false).then(function () {
             showHome();
             toast(names + 'に' + KIND_LABEL[kind] + ' を記録しました');
           });
         }).catch(function () {
-          okBtn.disabled = false;
-          toast('送信できませんでした。通信を確認して、もう一度お試しください');
+          setSnackSaving(false);
+          toast('記録できませんでした。通信を確認して、もう一度押してください');
         });
       }
 
@@ -1092,19 +1237,39 @@
         pendingUndoRecord = null;
         document.getElementById('undoModal').classList.remove('open');
       }
-      function confirmUndo() {
-        if (!pendingUndoRecord || syncBusy) return;
-        var latest = pendingUndoRecord;
+      var undoDeleting = false;
+      function setUndoDeleting(deleting) {
+        undoDeleting = deleting;
         var btn = document.getElementById('undoConfirmBtn');
-        btn.disabled = true;
-        DataStore.removeRecord(latest.id).then(function () {
+        var cancelBtn = document.getElementById('undoCancelBtn');
+        if (deleting) {
+          if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+          btn.disabled = true;
+          btn.classList.add('is-deleting');
+          btn.setAttribute('aria-busy', 'true');
+          btn.textContent = '消しています…';
+          if (cancelBtn) cancelBtn.disabled = true;
+        } else {
           btn.disabled = false;
+          btn.classList.remove('is-deleting');
+          btn.removeAttribute('aria-busy');
+          btn.textContent = btn.dataset.label || '消す';
+          if (cancelBtn) cancelBtn.disabled = false;
+        }
+      }
+      function confirmUndo() {
+        if (!pendingUndoRecord || undoDeleting) return;
+        var latest = pendingUndoRecord;
+        try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {}
+        setUndoDeleting(true);
+        DataStore.removeRecord(latest.id).then(function () {
+          setUndoDeleting(false);
           closeUndoConfirm();
           return refreshRecords(false).then(function () {
             toast('取り消しました：' + fmtTimeShort(latest.ts) + ' ' + describeRecord(latest));
           });
         }).catch(function () {
-          btn.disabled = false;
+          setUndoDeleting(false);
           closeUndoConfirm();
           setSyncStatus('error', '取り消しを送信できませんでした。通信を確認してください。');
           toast('取り消しを送信できませんでした');
@@ -1153,13 +1318,15 @@
         document.getElementById('bottomHistoryBtn').addEventListener('click', function(){ if (state.view !== 'history') showHistory(); });
         Array.prototype.forEach.call(document.querySelectorAll('[data-snack]'), function(btn){ btn.addEventListener('click', function(){ showSnackPick(btn.getAttribute('data-snack')); }); });
         Array.prototype.forEach.call(document.querySelectorAll('[data-pick-cat]'), function(btn){ btn.addEventListener('click', function(){ toggleSnackCat(btn.getAttribute('data-pick-cat')); }); });
+        bindPeko(document.getElementById('recordBtn'));
+        bindPeko(document.getElementById('snackOkBtn'));
         document.getElementById('snackOkBtn').addEventListener('click', submitSnackSelected);
         document.getElementById('historyLinkBtn').addEventListener('click', showHistory);
         document.getElementById('homeUndoBtn').addEventListener('click', undoHomeLast);
         updateBottomBar();
 
         document.getElementById('mealForm').addEventListener('submit', submitMeal);
-        Array.prototype.forEach.call(document.querySelectorAll('.chips button'), function(btn){ btn.addEventListener('click', function(){ addChip(parseFloat(btn.getAttribute('data-add'))); }); });
+        Array.prototype.forEach.call(document.querySelectorAll('.chips button'), function(btn){ bindPeko(btn); btn.addEventListener('click', function(){ addChip(parseFloat(btn.getAttribute('data-add'))); }); });
         document.getElementById('chipUndoBtn').addEventListener('click', undoChip);
         document.getElementById('chipClearBtn').addEventListener('click', clearGrams);
         document.getElementById('gramsInput').addEventListener('input', function(){ chipStack = []; updateChipTools(); });
