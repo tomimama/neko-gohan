@@ -1,1 +1,13 @@
-{"background_color":"#241a20","display":"standalone","icons":[{"sizes":"192x192","src":"icon-192.png","type":"image/png"},{"sizes":"512x512","src":"icon-512.png","type":"image/png"}],"name":"猫ごはん記録","scope":".","short_name":"猫ごはん","start_url":".","theme_color":"#241a20"}
+{
+  "name": "猫ごはん記録",
+  "short_name": "猫ごはん",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#241a20",
+  "theme_color": "#241a20",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.webp", "sizes": "512x512", "type": "image/webp" }
+  ]
+}
