@@ -385,8 +385,12 @@
       .day-total .dt-num { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 16px; }
       .day-total .dt-goal { color: var(--ink-soft); font-size: 12px; }
       .day-list { list-style: none; margin: 10px 0 0; padding: 0; }
-      .day-item { display: flex; align-items: center; gap: 9px; padding: 7px 2px; font-size: 14.5px; }
+      .day-item { padding: 0; }
       .day-item + .day-item { border-top: 1px solid var(--track); }
+      /* 履歴の記録は行全体がボタン：タップで編集モーダルを開く */
+      .day-item-btn { display: flex; align-items: center; gap: 9px; width: 100%; padding: 7px 2px; background: none; border: none; color: inherit; font: inherit; font-size: 14.5px; text-align: left; border-radius: 8px; }
+      .day-item-btn:active { background: var(--bg); }
+      .day-item .d-edit { color: var(--ink-faint); font-size: 12.5px; font-weight: 700; white-space: nowrap; flex: none; }
       .day-item .d-time { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; min-width: 46px; }
       .day-item .d-cat { font-weight: 900; min-width: 52px; }
       .day-item .d-what { flex: 1; font-weight: 700; }
@@ -557,6 +561,20 @@
       .modal .undo-delete.is-deleting::before { content: ""; display: inline-block; width: 15px; height: 15px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; animation: btn-spin .7s linear infinite; }
       .modal .undo-cancel { border: 1px solid var(--card-border); border-radius: 14px; min-height: 52px; background: var(--card); color: var(--ink); font-weight: 700; font-size: 16px; }
       .modal .undo-cancel:active { transform: scale(.98); }
+      /* 記録の編集モーダル */
+      .edit-dt-row { display: flex; gap: 10px; margin-top: 14px; }
+      .edit-field { display: block; flex: 1 1 0; min-width: 0; }
+      .edit-label { display: block; font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-bottom: 5px; }
+      #editGramsField { margin-top: 12px; }
+      #editGramsField[hidden] { display: none; }
+      .edit-grams-box { display: inline-flex; }
+      .edit-grams-box input { font-size: 22px; padding: 7px 0; }
+      .modal .edit-note { margin: 12px 0 0; font-size: 12.5px; color: var(--ink-faint); font-weight: 700; line-height: 1.5; }
+      .modal .edit-save { border: none; border-radius: 14px; min-height: 56px; background: var(--ink); color: var(--bg); font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 19px; }
+      .modal .edit-save:active { transform: scale(.98); }
+      .modal .edit-save:disabled { cursor: default; }
+      .modal .edit-save.is-saving { transform: scale(.97); filter: brightness(.85); box-shadow: inset 0 3px 8px rgba(0,0,0,.25); }
+      .modal .edit-save.is-saving::before { content: ""; display: inline-block; width: 15px; height: 15px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.4); border-top-color: currentColor; animation: btn-spin .7s linear infinite; }
       @media (prefers-reduced-motion: reduce) { .bar > i, .toast { transition: none; } }
     </style>
   </head>
@@ -674,7 +692,7 @@
       <!-- ================= 履歴画面（日別） ================= -->
       <div id="historyView" hidden>
         <div class="all-history-title">履歴</div>
-        <p class="all-history-sub">日ごとにまとめています（1日は朝4時から数えます）</p>
+        <p class="all-history-sub">日ごとにまとめています（1日は朝4時から数えます）。記録をタップすると、時刻と量を直せます。</p>
         <div id="allHistoryList"></div>
         <div class="history-empty" id="allHistoryEmpty">まだ記録がありません</div>
       </div>
@@ -764,6 +782,26 @@
       </div>
     </div>
 
+    <div class="modal-back" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+      <div class="modal">
+        <h2 id="editModalTitle">記録を直す</h2>
+        <div class="undo-detail" id="editDetail"></div>
+        <form id="editForm">
+          <div class="edit-dt-row">
+            <label class="edit-field"><span class="edit-label">日付</span><span class="pass-input-box"><input id="editDate" type="date" aria-label="日付" /></span></label>
+            <label class="edit-field"><span class="edit-label">時刻</span><span class="pass-input-box"><input id="editTime" type="time" aria-label="時刻" /></span></label>
+          </div>
+          <label class="edit-field" id="editGramsField"><span class="edit-label">食べた量</span><span class="gram-input-box edit-grams-box"><input id="editGrams" type="number" inputmode="decimal" min="0" max="200" step="0.5" aria-label="食べた量（グラム）" /><span class="unit">g</span></span></label>
+          <p class="edit-note">時刻を変えると、朝4時の区切りで別の日の記録になることがあります。</p>
+          <div class="form-msg" id="editMsg" role="alert"></div>
+          <div class="undo-actions">
+            <button type="submit" class="edit-save" id="editSaveBtn">保存する</button>
+            <button type="button" class="undo-cancel" id="editCancelBtn">やめる</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div class="modal-back" id="giverModal" role="dialog" aria-modal="true" aria-labelledby="giverModalTitle">
       <div class="modal">
         <h2 id="giverModalTitle">このスマホは だれのもの？</h2>
@@ -849,6 +887,10 @@
         },
         removeRecord: function (id) {
           return bridgePost({ pass: getBridgePass(), action: 'remove', id: String(id) });
+        },
+        /* 履歴の修正：橋渡しに action:'update' で id・新しい日時・グラム（ごはん以外は null）を送る */
+        updateRecord: function (record) {
+          return bridgePost({ pass: getBridgePass(), action: 'update', record: { id: String(record.id), ts: new Date(record.ts).toISOString(), grams: (record.grams === null || record.grams === undefined) ? null : Number(record.grams) } });
         },
         getGiver: function () { try { return localStorage.getItem(this.GIVER_KEY) || ''; } catch (e) { return ''; } },
         setGiver: function (name) { try { localStorage.setItem(this.GIVER_KEY, name); } catch (e) {} }
@@ -1050,13 +1092,21 @@
               '<span class="day-total kotaro">小太郎 合計 <span class="dt-num">' + fmtGrams(totals.kotaro) + '</span></span>' +
             '</div><ul class="day-list">';
           recs.forEach(function(r){
-            html += '<li class="day-item"><span class="d-time">' + fmtTimeShort(r.ts) + '</span><span class="dot ' + r.cat + '"></span><span class="d-cat">' + CATS[r.cat].name + '</span><span class="d-what">' + whatLabel(r) + '</span><span class="d-who">' + giverHTML(r.giver) + '</span></li>';
+            html += '<li class="day-item"><button type="button" class="day-item-btn" data-edit-id="' + r.id + '"><span class="d-time">' + fmtTimeShort(r.ts) + '</span><span class="dot ' + r.cat + '"></span><span class="d-cat">' + CATS[r.cat].name + '</span><span class="d-what">' + whatLabel(r) + '</span><span class="d-who">' + giverHTML(r.giver) + '</span><span class="d-edit" aria-hidden="true">直す ›</span></button></li>';
           });
           html += '</ul>';
           var block = document.createElement('div');
           block.className = 'day-block';
           block.innerHTML = html;
           wrap.appendChild(block);
+          /* 各記録の行タップで編集モーダルを開く（自分の記録・母の記録どちらも対象） */
+          Array.prototype.forEach.call(block.querySelectorAll('[data-edit-id]'), function(btn){
+            bindPeko(btn);
+            btn.addEventListener('click', function(){
+              var rec = state.records.filter(function(x){ return x.id === btn.getAttribute('data-edit-id'); })[0];
+              if (rec) openEditModal(rec);
+            });
+          });
         });
       }
 
@@ -1467,6 +1517,93 @@
         openUndoConfirm(latest);
       }
 
+      /* 履歴の記録を直す：直せるのは日時とグラム（ごはんのときだけ）だけ。
+         猫・種別・あげた人は変えない。保存は橋渡しの action:'update' に送る */
+      var pendingEditRecord = null;
+      var editSaving = false;
+      function pad2(n) { return String(n).padStart(2, '0'); }
+      function openEditModal(record) {
+        if (!record || editSaving) return;
+        pendingEditRecord = record;
+        var detail = document.getElementById('editDetail');
+        detail.innerHTML =
+          '<div class="undo-detail-main"><span class="dot ' + record.cat + '"></span><span>' + CATS[record.cat].name + '</span><span class="ud-time">' + fmtTimeShort(record.ts) + '</span><span class="ud-what">' + whatLabel(record) + '</span></div>' +
+          '<div class="undo-detail-sub">あげた人：<span class="giver-tag">' + giverHTML(record.giver) + '</span></div>';
+        var d = new Date(record.ts);
+        document.getElementById('editDate').value = d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+        document.getElementById('editTime').value = pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+        var gField = document.getElementById('editGramsField');
+        if (record.kind === 'meal') {
+          gField.hidden = false;
+          document.getElementById('editGrams').value = record.grams;
+        } else {
+          gField.hidden = true;
+          document.getElementById('editGrams').value = '';
+        }
+        document.getElementById('editMsg').textContent = '';
+        document.getElementById('editModal').classList.add('open');
+      }
+      function closeEditModal() {
+        if (editSaving) return;
+        pendingEditRecord = null;
+        document.getElementById('editModal').classList.remove('open');
+      }
+      function setEditSaving(saving) {
+        editSaving = saving;
+        var btn = document.getElementById('editSaveBtn');
+        var cancelBtn = document.getElementById('editCancelBtn');
+        ['editDate', 'editTime', 'editGrams'].forEach(function (id) { document.getElementById(id).disabled = saving; });
+        if (saving) {
+          if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+          btn.disabled = true;
+          btn.classList.add('is-saving');
+          btn.setAttribute('aria-busy', 'true');
+          btn.textContent = '保存中…';
+          if (cancelBtn) cancelBtn.disabled = true;
+        } else {
+          btn.disabled = false;
+          btn.classList.remove('is-saving');
+          btn.removeAttribute('aria-busy');
+          btn.textContent = btn.dataset.label || '保存する';
+          if (cancelBtn) cancelBtn.disabled = false;
+        }
+      }
+      function submitEdit(ev) {
+        ev.preventDefault();
+        if (!pendingEditRecord || editSaving) return;
+        var record = pendingEditRecord;
+        var msg = document.getElementById('editMsg');
+        var dateVal = document.getElementById('editDate').value;
+        var timeVal = document.getElementById('editTime').value;
+        msg.textContent = '';
+        if (!dateVal || !timeVal) { msg.textContent = '日付と時刻を入れてください'; return; }
+        var dp = dateVal.split('-'), tp = timeVal.split(':');
+        var newTs = new Date(+dp[0], +dp[1] - 1, +dp[2], +tp[0], +tp[1], 0, 0).getTime();
+        if (isNaN(newTs)) { msg.textContent = '日付と時刻を確認してください'; return; }
+        var newGrams = null;
+        if (record.kind === 'meal') {
+          newGrams = parseFloat(document.getElementById('editGrams').value);
+          if (isNaN(newGrams) || newGrams <= 0) { msg.textContent = '食べた量（グラム）を入れてください'; return; }
+          if (newGrams > 200) { msg.textContent = '量が大きすぎます。確認してください'; return; }
+        }
+        try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {}
+        var sb = document.getElementById('editSaveBtn'); if (sb && !sb.classList.contains('is-peko')) triggerPeko(sb);
+        setEditSaving(true);
+        DataStore.updateRecord({ id: record.id, ts: newTs, grams: newGrams }).then(function () {
+          /* 取り直しの間も「保存中…」とロックを維持する */
+          return refreshRecords(false);
+        }).then(function () {
+          setEditSaving(false);
+          pendingEditRecord = null;
+          document.getElementById('editModal').classList.remove('open');
+          toast('記録を直しました');
+        }).catch(function () {
+          /* 失敗：モーダルは開いたまま、入力した内容もそのまま残す */
+          setEditSaving(false);
+          msg.textContent = '保存できませんでした。通信を確認して、もう一度押してください';
+        });
+      }
+
       var modal = document.getElementById('giverModal');
       function openGiverModal(canCancel) { modal.classList.add('open'); document.getElementById('giverCancel').style.display = canCancel ? 'block' : 'none'; }
       function closeGiverModal() { modal.classList.remove('open'); }
@@ -1521,6 +1658,9 @@
         document.getElementById('undoConfirmBtn').addEventListener('click', confirmUndo);
         document.getElementById('undoCancelBtn').addEventListener('click', closeUndoConfirm);
         document.getElementById('undoModal').addEventListener('click', function(ev){ if (ev.target === ev.currentTarget) closeUndoConfirm(); });
+        document.getElementById('editForm').addEventListener('submit', submitEdit);
+        document.getElementById('editCancelBtn').addEventListener('click', closeEditModal);
+        document.getElementById('editModal').addEventListener('click', function(ev){ if (ev.target === ev.currentTarget) closeEditModal(); });
         document.getElementById('giverChange').addEventListener('click', function(){ openGiverModal(true); });
         document.getElementById('giverCancel').addEventListener('click', closeGiverModal);
         Array.prototype.forEach.call(modal.querySelectorAll('[data-giver]'), function(btn){ btn.addEventListener('click', function(){ state.giver = btn.getAttribute('data-giver'); DataStore.setGiver(state.giver); closeGiverModal(); renderGiver(); toast('このスマホは「' + state.giver + '」に設定しました'); }); });
