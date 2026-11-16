@@ -165,6 +165,12 @@
       .sync-status { margin-top: 10px; background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; box-shadow: var(--shadow); padding: 10px 14px; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
       .sync-status.error { color: var(--danger); border-color: var(--danger); }
       .sync-status button { margin-left: auto; border: 1px solid var(--card-border); background: var(--bg); color: var(--ink); border-radius: 999px; min-height: 36px; padding: 4px 16px; font-size: 13px; font-weight: 700; }
+      .sync-status .sync-spin { width: 16px; height: 16px; flex: none; border-radius: 50%; border: 2.5px solid var(--track); border-top-color: var(--ink-soft); animation: btn-spin .7s linear infinite; display: none; }
+      .sync-status.loading .sync-spin { display: block; }
+      /* 読み込み中（自動再試行の間を含む）は入力を受け付けない見た目にする：
+         操作対象をグレーアウトし、タップも効かなくする（inert と併用） */
+      body.sync-locked .cat-card, body.sync-locked .snack-btn, body.sync-locked .pick-cat, body.sync-locked .input-card, body.sync-locked .recent-list, body.sync-locked .history-list, body.sync-locked .day-block, body.sync-locked .history-link-btn, body.sync-locked .giver-badge, body.sync-locked .bottom-bar { opacity: .55; }
+      body.sync-locked .wrap button, body.sync-locked .wrap input, body.sync-locked .bottom-bar button { pointer-events: none; }
       .cache-notice { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px dashed var(--card-border); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
       .cache-notice::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); flex: none; }
       /* 初回読み込み中：大きな時刻表示の代わりに「読み込み中…」を控えめな大きさで出す */
@@ -280,7 +286,7 @@
       /* 押している間の沈み込み（:active）：アニメーションの前の一瞬でも反応が分かるよう、:active が無かったボタンにも付ける */
       .giver-badge button:active, .undo-mini:active, .undo-btn:active, .history-link-btn:active, .back-btn:active, .sync-status button:active, .modal .pick button:active, .modal .cancel:active, .modal .undo-cancel:active { transform: scale(.97); }
       .cat-card:active { transform: scale(.985); }
-      @media (prefers-reduced-motion: reduce) { .record-btn.is-saving::before, .snack-ok-btn.is-saving::before, .modal .undo-delete.is-deleting::before, .snack-status .spin { animation: none; } button.is-peko { animation: none; } }
+      @media (prefers-reduced-motion: reduce) { .record-btn.is-saving::before, .snack-ok-btn.is-saving::before, .modal .undo-delete.is-deleting::before, .snack-status .spin, .sync-status .sync-spin { animation: none; } button.is-peko { animation: none; } }
       /* 足し算チップ：3個×2段のグリッド。押すたびにその数字が今の入力値に足される */
       .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
       .chips button { border: 1.5px solid var(--card-border); background: var(--bg); color: var(--ink); border-radius: 14px; min-height: 48px; padding: 4px 6px; font-size: 19px; font-weight: 900; font-family: "Zen Maru Gothic",sans-serif; }
@@ -552,7 +558,7 @@
           <div class="giver-badge">このスマホ：<span id="giverName">未設定</span><button type="button" id="giverChange">変更</button></div>
         </div>
         <p class="guide-line">ごはんの目安は <b>7時・13時・21時</b> ／ 1日は朝4時から数えます</p>
-        <div class="sync-status" id="syncStatus" hidden><span id="syncStatusText">読み込み中…</span><button type="button" id="syncRetryBtn" hidden>再試行</button><button type="button" id="syncPassBtn" hidden>合言葉を入れ直す</button></div>
+        <div class="sync-status" id="syncStatus" hidden><span class="sync-spin" aria-hidden="true"></span><span id="syncStatusText">読み込み中…</span><button type="button" id="syncRetryBtn" hidden>再試行</button><button type="button" id="syncPassBtn" hidden>合言葉を入れ直す</button></div>
         <div><span class="cache-notice" id="cacheNotice" hidden>前回の記録を表示中</span></div>
 
         <div class="cards">
@@ -783,11 +789,18 @@
       function toWireRecord(r) {
         return { id: String(r.id), ts: new Date(r.ts).toISOString(), cat: r.cat, kind: r.kind, grams: (r.grams === null || r.grams === undefined) ? null : Number(r.grams), giver: r.giver || '' };
       }
+      /* 橋渡しのエラー種別を Error.code に残す。合言葉エラー（error:"passcode"）は
+         通信失敗と区別し、自動再試行せず合言葉の入れ直しだけを案内するために使う */
+      function bridgeError(data, fallbackMsg) {
+        var err = new Error(fallbackMsg || 'bridge error');
+        if (data && data.error === 'passcode') err.code = 'passcode';
+        return err;
+      }
       function bridgePost(payload) {
-        if (!getBridgePass()) return Promise.reject(new Error('no bridge pass'));
+        if (!getBridgePass()) { var np = new Error('no bridge pass'); np.code = 'nopass'; return Promise.reject(np); }
         return fetch(BRIDGE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
           .then(function (res) { if (!res.ok) throw new Error('http ' + res.status); return res.json(); })
-          .then(function (data) { if (!data || data.ok !== true) throw new Error('bridge error'); return data; });
+          .then(function (data) { if (!data || data.ok !== true) throw bridgeError(data); return data; });
       }
       var DataStore = {
         GIVER_KEY: 'neko-gohan-giver-v1',
@@ -805,11 +818,11 @@
           try { localStorage.setItem(this.CACHE_KEY, JSON.stringify(records.map(toWireRecord))); } catch (e) {}
         },
         fetchRecords: function () {
-          if (!getBridgePass()) return Promise.reject(new Error('no bridge pass'));
+          if (!getBridgePass()) { var np = new Error('no bridge pass'); np.code = 'nopass'; return Promise.reject(np); }
           return fetch(BRIDGE_URL + '?pass=' + encodeURIComponent(getBridgePass()) + '&action=list')
             .then(function (res) { if (!res.ok) throw new Error('http ' + res.status); return res.json(); })
             .then(function (data) {
-              if (!data || data.ok !== true || !Array.isArray(data.records)) throw new Error('bridge error');
+              if (!data || data.ok !== true || !Array.isArray(data.records)) throw bridgeError(data);
               return data.records.map(normalizeRecord).filter(function (r) { return r.cat && r.kind; });
             });
         },
@@ -1076,42 +1089,99 @@
       var toastTimer = null;
       function toast(msg) { var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){ el.classList.remove('show'); },2600); }
 
-      /* 共有シートとの同期状態の表示（控えめな帯＋失敗時は再試行ボタン） */
+      /* 共有シートとの同期状態の表示。
+         通信のタイミングで失敗したときは、すぐエラーにせず自動で再試行する。
+         再試行の間は「読み込み中…」だけを出し、画面は入力を受け付けない見た目（グレーアウト＋無効化）にする。
+         ボタンは人の手が要るときだけ出す：自動再試行を使い切ったら「再試行」、
+         合言葉エラーのときだけ「合言葉を入れ直す」（通信失敗の表示には出さない） */
       var syncBusy = false;
       function setSyncStatus(mode, text) {
         var box = document.getElementById('syncStatus');
         var label = document.getElementById('syncStatusText');
         var retry = document.getElementById('syncRetryBtn');
         var passBtn = document.getElementById('syncPassBtn');
-        if (mode === 'hide') { box.hidden = true; return; }
+        if (mode === 'hide') { box.hidden = true; box.classList.remove('error', 'loading'); return; }
         box.hidden = false;
-        box.classList.toggle('error', mode === 'error');
+        box.classList.toggle('error', mode === 'error' || mode === 'pass');
+        box.classList.toggle('loading', mode === 'loading');
         label.textContent = text;
         retry.hidden = mode !== 'error';
-        if (passBtn) passBtn.hidden = mode !== 'error';
+        if (passBtn) passBtn.hidden = mode !== 'pass';
       }
+      /* 読み込み中の入力ロック：各画面と下部バーを inert にし、見た目もグレーアウトする（body.sync-locked のCSS） */
+      function lockSyncInput(locked) {
+        document.body.classList.toggle('sync-locked', locked);
+        ['homeView', 'inputView', 'snackView', 'historyView', 'bottomBar'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.inert = locked;
+        });
+      }
+      var SYNC_RETRY_MAX = 2;        /* 自動再試行の回数（初回失敗のあと最大2回まで自動で取り直す。初回＋2回＝最大3回試行） */
+      var SYNC_RETRY_DELAYS = [1000, 2000];   /* 自動再試行の間隔（ミリ秒）：1秒→2秒と延ばす。合計3秒 */
       function refreshRecords(showLoading) {
         if (syncBusy) return Promise.resolve(false);
         syncBusy = true;
-        if (showLoading) setSyncStatus('loading', '読み込み中…');
-        return DataStore.fetchRecords().then(function (records) {
-          state.records = records;
-          state.hasLoadedOnce = true;
-          state.showingCached = false;
-          DataStore.setCachedRecords(records);
+        /* 合言葉が未設定なら通信はしない。自動再試行もせず、合言葉の案内だけを出す */
+        if (!getBridgePass()) {
           syncBusy = false;
-          setSyncStatus('hide');
-          renderAll();
-          return true;
-        }).catch(function () {
-          syncBusy = false;
-          /* 失敗時は今の表示（前回の表示があればそれ）をそのまま保ち、空表示には切り替えない。
-             前回の表示が無い初回だけ、読み込み中表示を終えてエラー＋再試行に任せる */
           if (!state.showingCached) state.hasLoadedOnce = true;
-          setSyncStatus('error', getBridgePass() ? '読み込めませんでした。通信を確認してください。' : '合言葉が未設定です。合言葉を入力してください。');
+          setSyncStatus('pass', '合言葉を入力してください');
           renderAll();
-          return false;
-        });
+          return Promise.resolve(false);
+        }
+        var engaged = false;
+        function engage() {
+          if (engaged) return;
+          engaged = true;
+          setSyncStatus('loading', '読み込み中…');
+          lockSyncInput(true);
+        }
+        function disengage() {
+          if (!engaged) return;
+          engaged = false;
+          lockSyncInput(false);
+        }
+        if (showLoading) engage();
+        var attempt = 0;
+        function tryOnce() {
+          attempt++;
+          return DataStore.fetchRecords().then(function (records) {
+            state.records = records;
+            state.hasLoadedOnce = true;
+            state.showingCached = false;
+            DataStore.setCachedRecords(records);
+            syncBusy = false;
+            disengage();
+            setSyncStatus('hide');
+            renderAll();
+            return true;
+          }).catch(function (err) {
+            /* 合言葉エラーは自動再試行しない。この場合だけ合言葉の入れ直しを出す */
+            if (err && (err.code === 'passcode' || err.code === 'nopass')) {
+              syncBusy = false;
+              disengage();
+              if (!state.showingCached) state.hasLoadedOnce = true;
+              setSyncStatus('pass', err.code === 'nopass' ? '合言葉を入力してください' : '合言葉が違います');
+              renderAll();
+              return false;
+            }
+            /* 通信のタイミングの失敗：エラーは出さず、「読み込み中…」＋入力ロックのまま自動で取り直す。
+               失敗時は今の表示（前回の表示があればそれ）をそのまま保ち、空表示には切り替えない */
+            engage();
+            if (attempt <= SYNC_RETRY_MAX) {
+              var delay = SYNC_RETRY_DELAYS[attempt - 1] || SYNC_RETRY_DELAYS[SYNC_RETRY_DELAYS.length - 1];
+              return new Promise(function (resolve) { setTimeout(resolve, delay); }).then(tryOnce);
+            }
+            /* 自動再試行を使い切って初めて、失敗の表示と「再試行」ボタンを出す */
+            syncBusy = false;
+            disengage();
+            if (!state.showingCached) state.hasLoadedOnce = true;
+            setSyncStatus('error', '読み込めませんでした');
+            renderAll();
+            return false;
+          });
+        }
+        return tryOnce();
       }
 
       function newRecord(cat, kind, grams) { return { id: 'r'+Date.now().toString(36)+Math.floor(Math.random()*100000).toString(36), ts: Date.now(), cat: cat, kind: kind, grams: grams, giver: state.giver }; }
