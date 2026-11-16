@@ -393,15 +393,21 @@
       .day-total.kotaro.is-active { background: var(--kotaro); border-color: var(--kotaro-deep); }
       .day-total.is-active .dt-goal { color: rgba(255,255,255,.85); }
       .day-total.all.is-active .dt-goal { color: var(--bg); }
-      .day-total:active { transform: scale(.97); }
+      /* 履歴タブはシャキッと：色だけを0.1秒で切り替え、弾む変形は付けない */
+      .day-total { transition: background-color .1s ease, border-color .1s ease, color .1s ease; }
+      .day-total:active { transform: none; }
+      .day-total.is-peko { animation: none !important; }
       .day-filter-empty { margin: 10px 0 2px; padding: 12px; text-align: center; color: var(--ink-faint); font-size: 13.5px; font-weight: 700; background: var(--bg); border: 1px dashed var(--card-border); border-radius: 12px; }
       .day-list { list-style: none; margin: 10px 0 0; padding: 0; }
       .day-item { padding: 0; }
       .day-item + .day-item { border-top: 1px solid var(--track); }
-      /* 履歴の記録は行全体がボタン：タップで編集モーダルを開く */
-      .day-item-btn { display: flex; align-items: center; gap: 8px; width: 100%; box-sizing: border-box; min-width: 0; padding: 8px 2px; background: none; border: none; color: inherit; font: inherit; font-size: 14.5px; text-align: left; border-radius: 8px; }
+      /* 履歴の記録は行全体がボタン：長押しで編集モーダルを開く（タップでは開かない）
+         長押し中の文字選択・標準メニュー・コールアウトを抑止し、スクロールと競合させない */
+      .day-item-btn { display: flex; align-items: center; gap: 8px; width: 100%; box-sizing: border-box; min-width: 0; padding: 8px 2px; background: none; border: none; color: inherit; font: inherit; font-size: 14.5px; text-align: left; border-radius: 8px; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y; transition: background-color .12s ease; }
+      .day-item-btn * { -webkit-user-select: none; user-select: none; }
       .day-item .d-what { min-width: 0; overflow-wrap: anywhere; }
-      .day-item-btn:active { background: var(--bg); }
+      .day-item-btn.is-holding { background: var(--track); transition: background-color .45s linear; }
+      .day-item-btn.is-longpressed { background: var(--toki-soft); transition: background-color .08s ease; }
       .day-item .d-time { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; min-width: 46px; }
       .day-item .d-cat { font-weight: 900; min-width: 52px; }
       .day-item .d-what { flex: 1; font-weight: 700; }
@@ -576,7 +582,15 @@
       .edit-dt-row { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
       .edit-field { display: block; width: 100%; min-width: 0; box-sizing: border-box; }
       .edit-dt-row .pass-input-box { display: block; width: 100%; box-sizing: border-box; padding: 0 12px; overflow: hidden; }
-      .edit-dt-row .pass-input-box input, #editDate, #editTime { width: 100%; max-width: 100%; box-sizing: border-box; min-height: 52px; font-size: 17px; line-height: 1.4; padding: 10px 0; margin: 0; }
+      .edit-dt-row .pass-input-box input, #editDate { width: 100%; max-width: 100%; box-sizing: border-box; min-height: 52px; font-size: 17px; line-height: 1.4; padding: 10px 0; margin: 0; }
+      /* 時刻は時・分のプルダウン：標準の時計ダイヤルを出さず、大きく押しやすく2分割で並べる */
+      .edit-time-row { display: flex; gap: 8px; align-items: stretch; width: 100%; min-width: 0; box-sizing: border-box; }
+      .edit-time-part { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 6px; }
+      .edit-time-part .pass-input-box { flex: 1 1 0; min-width: 0; }
+      .edit-time-colon { display: flex; align-items: center; justify-content: center; flex: none; font-size: 20px; font-weight: 900; color: var(--ink-soft); line-height: 1; }
+      .edit-time-unit { flex: none; font-size: 15px; font-weight: 700; color: var(--ink-soft); }
+      .edit-dt-row select, #editHour, #editMinute { width: 100%; max-width: 100%; box-sizing: border-box; min-height: 52px; height: 52px; font-size: 17px; line-height: 1.4; padding: 10px 4px; margin: 0; border: none; outline: none; background: transparent; color: var(--ink); font-family: inherit; font-weight: 700; cursor: pointer; }
+      .edit-dt-row select:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 1px; }
       .edit-label { display: block; font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-bottom: 5px; }
       #editGramsField { margin-top: 12px; }
       #editGramsField[hidden] { display: none; }
@@ -706,7 +720,7 @@
       <div id="historyView" hidden>
         <div class="all-history-title">履歴</div>
         <p class="all-history-sub">1日は朝4時から</p>
-        <p class="history-edit-hint"><span class="hint-pencil" aria-hidden="true">✎</span><span>記録をタップすると直せます</span></p>
+        <p class="history-edit-hint"><span class="hint-pencil" aria-hidden="true">✎</span><span>記録を長押しすると直せます</span></p>
         <div id="allHistoryList"></div>
         <div class="history-empty" id="allHistoryEmpty">まだ記録がありません</div>
       </div>
@@ -802,7 +816,7 @@
         <form id="editForm">
           <div class="edit-dt-row">
             <label class="edit-field"><span class="edit-label">日付</span><span class="pass-input-box"><input id="editDate" type="date" aria-label="日付" /></span></label>
-            <label class="edit-field"><span class="edit-label">時刻</span><span class="pass-input-box"><input id="editTime" type="time" aria-label="時刻" /></span></label>
+            <div class="edit-field"><span class="edit-label" id="editTimeLabel">時刻</span><div class="edit-time-row" role="group" aria-labelledby="editTimeLabel"><label class="edit-time-part"><span class="pass-input-box"><select id="editHour" aria-label="時"></select></span><span class="edit-time-unit">時</span></label><span class="edit-time-colon" aria-hidden="true">:</span><label class="edit-time-part"><span class="pass-input-box"><select id="editMinute" aria-label="分"></select></span><span class="edit-time-unit">分</span></label></div></div>
           </div>
           <label class="edit-field" id="editGramsField"><span class="edit-label">食べた量</span><span class="gram-input-box edit-grams-box"><input id="editGrams" type="number" inputmode="decimal" min="0" max="200" step="0.5" aria-label="食べた量（グラム）" /><span class="unit">g</span></span></label>
           <p class="edit-note">時刻を変えると別の日の記録になることがあります。</p>
@@ -1144,21 +1158,18 @@
           block.setAttribute('data-day-key', k);
           block.innerHTML = html;
           wrap.appendChild(block);
-          /* 合計タブ：この日だけを、その猫の記録だけに絞り込む（他の日には影響しない） */
+          /* 合計タブ：この日だけを、その猫の記録だけに絞り込む（他の日には影響しない）
+             このタブだけはペコっとを付けない（シャキッと色だけ切り替える） */
           Array.prototype.forEach.call(block.querySelectorAll('[data-day-filter]'), function(tab){
-            bindPeko(tab);
             tab.addEventListener('click', function(){
               state.dayFilters[k] = tab.getAttribute('data-day-filter');
               applyDayFilter(block, k);
             });
           });
-          /* 各記録の行タップで編集モーダルを開く（自分の記録・母の記録どちらも対象） */
+          /* 各記録は長押しで編集モーダルを開く（自分の記録・母の記録どちらも対象）。
+             タップでは開かない。スクロールしようとして触れただけでは開かないようにする */
           Array.prototype.forEach.call(block.querySelectorAll('[data-edit-id]'), function(btn){
-            bindPeko(btn);
-            btn.addEventListener('click', function(){
-              var rec = state.records.filter(function(x){ return x.id === btn.getAttribute('data-edit-id'); })[0];
-              if (rec) openEditModal(rec);
-            });
+            bindLongPressEdit(btn);
           });
         });
       }
@@ -1212,6 +1223,65 @@
         if (!el) return;
         /* pointerdown が一番早い。click はキーボード操作などの保険 */
         el.addEventListener('pointerdown', function () { triggerPeko(el); }, { passive: true });
+      }
+
+      /* 履歴の記録用：長押し（500ms・指を動かさない）でだけ編集を開く。
+         タップでは何もしない。途中で指が動いたら（スクロール開始）取り消す。
+         標準のコンテキストメニュー／文字選択は抑止する */
+      var LONG_PRESS_MS = 500;
+      var LONG_PRESS_MOVE_PX = 10;
+      function bindLongPressEdit(btn) {
+        if (!btn) return;
+        var timer = null;
+        var startX = 0;
+        var startY = 0;
+        var fired = false;
+        function clearHold() {
+          if (timer) { clearTimeout(timer); timer = null; }
+          btn.classList.remove('is-holding');
+        }
+        btn.addEventListener('contextmenu', function (ev) { ev.preventDefault(); });
+        btn.addEventListener('click', function (ev) {
+          /* キーボード操作（Enter / Space、detail===0）だけはそのまま開けるようにする */
+          if (ev.detail === 0) {
+            var recKb = state.records.filter(function (x) { return x.id === btn.getAttribute('data-edit-id'); })[0];
+            if (recKb) openEditModal(recKb);
+            return;
+          }
+          /* マウス／タッチのタップと、長押し直後の click はどちらも開かない */
+          ev.preventDefault();
+          if (fired) { ev.stopPropagation(); fired = false; }
+        });
+        btn.addEventListener('pointerdown', function (ev) {
+          fired = false;
+          startX = ev.clientX;
+          startY = ev.clientY;
+          if (timer) clearTimeout(timer);
+          btn.classList.add('is-holding');
+          timer = setTimeout(function () {
+            timer = null;
+            fired = true;
+            btn.classList.remove('is-holding');
+            btn.classList.add('is-longpressed');
+            try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
+            var rec = state.records.filter(function (x) { return x.id === btn.getAttribute('data-edit-id'); })[0];
+            setTimeout(function () { btn.classList.remove('is-longpressed'); }, 220);
+            if (rec) openEditModal(rec);
+          }, LONG_PRESS_MS);
+        });
+        btn.addEventListener('pointermove', function (ev) {
+          if (!timer) return;
+          if (Math.abs(ev.clientX - startX) > LONG_PRESS_MOVE_PX || Math.abs(ev.clientY - startY) > LONG_PRESS_MOVE_PX) {
+            clearHold();
+          }
+        });
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (type) {
+          btn.addEventListener(type, function () { clearHold(); });
+        });
+        /* iOS Safari 向け：長押しの選択・コールアウトをタッチ側でも抑える */
+        btn.addEventListener('touchstart', function () {}, { passive: true });
+        btn.addEventListener('selectstart', function (ev) { ev.preventDefault(); });
+        btn.addEventListener('dragstart', function (ev) { ev.preventDefault(); });
       }
 
       var toastTimer = null;
@@ -1575,6 +1645,26 @@
       var pendingEditRecord = null;
       var editSaving = false;
       function pad2(n) { return String(n).padStart(2, '0'); }
+      function ensureEditTimeOptions() {
+        var hourSel = document.getElementById('editHour');
+        var minSel = document.getElementById('editMinute');
+        if (hourSel && !hourSel.options.length) {
+          for (var h = 0; h < 24; h++) {
+            var ho = document.createElement('option');
+            ho.value = String(h);
+            ho.textContent = pad2(h);
+            hourSel.appendChild(ho);
+          }
+        }
+        if (minSel && !minSel.options.length) {
+          for (var m = 0; m < 60; m++) {
+            var mo = document.createElement('option');
+            mo.value = String(m);
+            mo.textContent = pad2(m);
+            minSel.appendChild(mo);
+          }
+        }
+      }
       function openEditModal(record) {
         if (!record || editSaving) return;
         pendingEditRecord = record;
@@ -1584,7 +1674,9 @@
           '<div class="undo-detail-sub">あげた人：<span class="giver-tag">' + giverHTML(record.giver) + '</span></div>';
         var d = new Date(record.ts);
         document.getElementById('editDate').value = d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
-        document.getElementById('editTime').value = pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+        ensureEditTimeOptions();
+        document.getElementById('editHour').value = String(d.getHours());
+        document.getElementById('editMinute').value = String(d.getMinutes());
         var gField = document.getElementById('editGramsField');
         if (record.kind === 'meal') {
           gField.hidden = false;
@@ -1605,7 +1697,7 @@
         editSaving = saving;
         var btn = document.getElementById('editSaveBtn');
         var cancelBtn = document.getElementById('editCancelBtn');
-        ['editDate', 'editTime', 'editGrams'].forEach(function (id) { document.getElementById(id).disabled = saving; });
+        ['editDate', 'editHour', 'editMinute', 'editGrams'].forEach(function (id) { document.getElementById(id).disabled = saving; });
         if (saving) {
           if (!btn.dataset.label) btn.dataset.label = btn.textContent;
           btn.disabled = true;
@@ -1627,11 +1719,12 @@
         var record = pendingEditRecord;
         var msg = document.getElementById('editMsg');
         var dateVal = document.getElementById('editDate').value;
-        var timeVal = document.getElementById('editTime').value;
+        var hourVal = document.getElementById('editHour').value;
+        var minuteVal = document.getElementById('editMinute').value;
         msg.textContent = '';
-        if (!dateVal || !timeVal) { msg.textContent = '日付と時刻を入れてください'; return; }
-        var dp = dateVal.split('-'), tp = timeVal.split(':');
-        var newTs = new Date(+dp[0], +dp[1] - 1, +dp[2], +tp[0], +tp[1], 0, 0).getTime();
+        if (!dateVal || hourVal === '' || hourVal === null || minuteVal === '' || minuteVal === null) { msg.textContent = '日付と時刻を入れてください'; return; }
+        var dp = dateVal.split('-');
+        var newTs = new Date(+dp[0], +dp[1] - 1, +dp[2], +hourVal, +minuteVal, 0, 0).getTime();
         if (isNaN(newTs)) { msg.textContent = '日付と時刻を確認してください'; return; }
         var newGrams = null;
         if (record.kind === 'meal') {
@@ -1666,6 +1759,7 @@
       function closePassModal() { passModal.classList.remove('open'); }
 
       function init() {
+        ensureEditTimeOptions();
         var now = new Date();
         document.getElementById('todayDate').textContent = (now.getMonth()+1) + '月' + now.getDate() + '日';
         document.getElementById('todayDow').textContent = '（' + DOW[now.getDay()] + '）';
