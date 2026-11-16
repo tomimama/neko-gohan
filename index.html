@@ -583,14 +583,15 @@
       .edit-field { display: block; width: 100%; min-width: 0; box-sizing: border-box; }
       .edit-dt-row .pass-input-box { display: block; width: 100%; box-sizing: border-box; padding: 0 12px; overflow: hidden; }
       .edit-dt-row .pass-input-box input, #editDate { width: 100%; max-width: 100%; box-sizing: border-box; min-height: 52px; font-size: 17px; line-height: 1.4; padding: 10px 0; margin: 0; }
-      /* 時刻は時・分のプルダウン：標準の時計ダイヤルを出さず、大きく押しやすく2分割で並べる */
+      /* 時刻は時・分の数字入力：プルダウンのスクロールをやめ、数字キーパッドで直接打てるようにする */
       .edit-time-row { display: flex; gap: 8px; align-items: stretch; width: 100%; min-width: 0; box-sizing: border-box; }
       .edit-time-part { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 6px; }
       .edit-time-part .pass-input-box { flex: 1 1 0; min-width: 0; }
       .edit-time-colon { display: flex; align-items: center; justify-content: center; flex: none; font-size: 20px; font-weight: 900; color: var(--ink-soft); line-height: 1; }
       .edit-time-unit { flex: none; font-size: 15px; font-weight: 700; color: var(--ink-soft); }
-      .edit-dt-row select, #editHour, #editMinute { width: 100%; max-width: 100%; box-sizing: border-box; min-height: 52px; height: 52px; font-size: 17px; line-height: 1.4; padding: 10px 4px; margin: 0; border: none; outline: none; background: transparent; color: var(--ink); font-family: inherit; font-weight: 700; cursor: pointer; }
-      .edit-dt-row select:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 1px; }
+      .edit-dt-row input[type="number"], #editHour, #editMinute { width: 100%; max-width: 100%; box-sizing: border-box; min-height: 52px; height: 52px; font-size: 17px; line-height: 1.4; padding: 10px 4px; margin: 0; border: none; outline: none; background: transparent; color: var(--ink); font-family: inherit; font-weight: 700; text-align: center; -moz-appearance: textfield; appearance: textfield; }
+      #editHour::-webkit-outer-spin-button, #editMinute::-webkit-outer-spin-button, #editHour::-webkit-inner-spin-button, #editMinute::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+      .edit-dt-row input:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 1px; }
       .edit-label { display: block; font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-bottom: 5px; }
       #editGramsField { margin-top: 12px; }
       #editGramsField[hidden] { display: none; }
@@ -816,7 +817,7 @@
         <form id="editForm">
           <div class="edit-dt-row">
             <label class="edit-field"><span class="edit-label">日付</span><span class="pass-input-box"><input id="editDate" type="date" aria-label="日付" /></span></label>
-            <div class="edit-field"><span class="edit-label" id="editTimeLabel">時刻</span><div class="edit-time-row" role="group" aria-labelledby="editTimeLabel"><label class="edit-time-part"><span class="pass-input-box"><select id="editHour" aria-label="時"></select></span><span class="edit-time-unit">時</span></label><span class="edit-time-colon" aria-hidden="true">:</span><label class="edit-time-part"><span class="pass-input-box"><select id="editMinute" aria-label="分"></select></span><span class="edit-time-unit">分</span></label></div></div>
+            <div class="edit-field"><span class="edit-label" id="editTimeLabel">時刻</span><div class="edit-time-row" role="group" aria-labelledby="editTimeLabel"><label class="edit-time-part"><span class="pass-input-box"><input id="editHour" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="23" step="1" placeholder="0" aria-label="時" /></span><span class="edit-time-unit">時</span></label><span class="edit-time-colon" aria-hidden="true">:</span><label class="edit-time-part"><span class="pass-input-box"><input id="editMinute" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" step="1" placeholder="00" aria-label="分" /></span><span class="edit-time-unit">分</span></label></div></div>
           </div>
           <label class="edit-field" id="editGramsField"><span class="edit-label">食べた量</span><span class="gram-input-box edit-grams-box"><input id="editGrams" type="number" inputmode="decimal" min="0" max="200" step="0.5" aria-label="食べた量（グラム）" /><span class="unit">g</span></span></label>
           <p class="edit-note">時刻を変えると別の日の記録になることがあります。</p>
@@ -1648,24 +1649,7 @@
       var editSaving = false;
       function pad2(n) { return String(n).padStart(2, '0'); }
       function ensureEditTimeOptions() {
-        var hourSel = document.getElementById('editHour');
-        var minSel = document.getElementById('editMinute');
-        if (hourSel && !hourSel.options.length) {
-          for (var h = 0; h < 24; h++) {
-            var ho = document.createElement('option');
-            ho.value = String(h);
-            ho.textContent = pad2(h);
-            hourSel.appendChild(ho);
-          }
-        }
-        if (minSel && !minSel.options.length) {
-          for (var m = 0; m < 60; m++) {
-            var mo = document.createElement('option');
-            mo.value = String(m);
-            mo.textContent = pad2(m);
-            minSel.appendChild(mo);
-          }
-        }
+        /* 時刻は入力式になったため、選択肢の生成は不要 */
       }
       function openEditModal(record) {
         if (!record || editSaving) return;
@@ -1724,10 +1708,13 @@
         var hourVal = document.getElementById('editHour').value;
         var minuteVal = document.getElementById('editMinute').value;
         msg.textContent = '';
-        if (!dateVal || hourVal === '' || hourVal === null || minuteVal === '' || minuteVal === null) { msg.textContent = '日付と時刻を入れてください'; return; }
+        if (!dateVal || hourVal === '' || hourVal === null || minuteVal === '' || minuteVal === null) { msg.textContent = '時刻を確認してください'; return; }
+        var hourNum = Number(hourVal);
+        var minuteNum = Number(minuteVal);
+        if (isNaN(hourNum) || isNaN(minuteNum) || Math.floor(hourNum) !== hourNum || Math.floor(minuteNum) !== minuteNum || hourNum < 0 || hourNum > 23 || minuteNum < 0 || minuteNum > 59) { msg.textContent = '時刻を確認してください'; return; }
         var dp = dateVal.split('-');
-        var newTs = new Date(+dp[0], +dp[1] - 1, +dp[2], +hourVal, +minuteVal, 0, 0).getTime();
-        if (isNaN(newTs)) { msg.textContent = '日付と時刻を確認してください'; return; }
+        var newTs = new Date(+dp[0], +dp[1] - 1, +dp[2], hourNum, minuteNum, 0, 0).getTime();
+        if (isNaN(newTs)) { msg.textContent = '時刻を確認してください'; return; }
         var newGrams = null;
         if (record.kind === 'meal') {
           newGrams = parseFloat(document.getElementById('editGrams').value);
