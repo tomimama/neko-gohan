@@ -1181,7 +1181,9 @@
         document.getElementById('bottomBar').hidden = isHome;
         document.querySelector('.wrap').classList.toggle('has-bottom-bar', !isHome);
         document.body.classList.toggle('has-bottom-bar', !isHome);
-        document.getElementById('bottomHistoryBtn').disabled = state.view === 'history';
+        var historyBtn = document.getElementById('bottomHistoryBtn');
+        historyBtn.hidden = state.view === 'history';
+        if (!historyBtn.hidden) historyBtn.disabled = false;
       }
 
       function showHome() { state.view='home'; state.pendingSnack=null; document.getElementById('inputView').hidden=true; document.getElementById('snackView').hidden=true; document.getElementById('historyView').hidden=true; document.getElementById('homeView').hidden=false; window.scrollTo(0,0); renderHome(); updateBottomBar(); }
