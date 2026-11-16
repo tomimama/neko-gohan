@@ -612,6 +612,11 @@
       .modal .edit-save:disabled { cursor: default; }
       .modal .edit-save.is-saving { transform: scale(.97); filter: brightness(.85); box-shadow: inset 0 3px 8px rgba(0,0,0,.25); }
       .modal .edit-save.is-saving::before { content: ""; display: inline-block; width: 15px; height: 15px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.4); border-top-color: currentColor; animation: btn-spin .7s linear infinite; }
+      /* 編集モーダル内の削除ボタン：保存ボタンと混同しないよう、線で区切って離し、危険色（淡い赤地＋赤文字＋赤枠）にする。押してもすぐには消えず、確認画面を挟む */
+      .edit-delete-zone { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--card-border); }
+      .modal .edit-delete { width: 100%; border: 1.5px solid var(--danger); border-radius: 14px; min-height: 52px; background: var(--danger-soft); color: var(--danger); font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 17px; }
+      .modal .edit-delete:active { transform: scale(.98); }
+      .modal .edit-delete:disabled { opacity: .55; }
       @media (prefers-reduced-motion: reduce) { .bar > i, .toast { transition: none; } }
     </style>
   </head>
@@ -841,6 +846,9 @@
             <button type="button" class="undo-cancel" id="editCancelBtn">やめる</button>
           </div>
         </form>
+        <div class="edit-delete-zone">
+          <button type="button" class="edit-delete" id="editDeleteBtn">この記録を消す</button>
+        </div>
       </div>
     </div>
 
@@ -1620,8 +1628,13 @@
       }
 
       var pendingUndoRecord = null;
+      /* 編集モーダルから削除確認を開いたかどうかと、キャンセル時に編集へ戻すための控え */
+      var undoFromEdit = false;
+      var undoEditBackup = null;
       function openUndoConfirm(record) {
         if (!record) return;
+        undoFromEdit = false;
+        undoEditBackup = null;
         pendingUndoRecord = record;
         var detail = document.getElementById('undoDetail');
         detail.innerHTML =
@@ -1630,8 +1643,32 @@
         document.getElementById('undoModal').classList.add('open');
       }
       function closeUndoConfirm() {
+        if (undoDeleting) return;
         pendingUndoRecord = null;
         document.getElementById('undoModal').classList.remove('open');
+        /* 編集モーダルから来た削除確認を「やめる」で閉じたら、元の記録の編集モーダルに戻る。
+           削除が成功したときは confirmUndo 側で undoFromEdit を落としてから閉じるので、ここでは戻らない */
+        if (undoFromEdit && undoEditBackup) {
+          var rec = undoEditBackup;
+          undoFromEdit = false;
+          undoEditBackup = null;
+          var fresh = state.records.filter(function (x) { return x.id === rec.id; })[0] || rec;
+          openEditModal(fresh);
+        } else {
+          undoFromEdit = false;
+          undoEditBackup = null;
+        }
+      }
+      /* 編集モーダルの「この記録を消す」：いきなり消さず、編集を閉じて既存の取り消し確認（猫・時刻・内容・あげた人）を出す。
+         確認で「消す」を押したときだけ confirmUndo が橋渡しの remove で消す。全種別（ごはん・おやつ・吐いた・備考）共通 */
+      function openDeleteFromEdit() {
+        if (!pendingEditRecord || editSaving || undoDeleting) return;
+        var rec = pendingEditRecord;
+        pendingEditRecord = null;
+        document.getElementById('editModal').classList.remove('open');
+        openUndoConfirm(rec);
+        undoFromEdit = true;
+        undoEditBackup = rec;
       }
       var undoDeleting = false;
       function setUndoDeleting(deleting) {
@@ -1663,6 +1700,9 @@
           return refreshRecords(false);
         }).then(function () {
           setUndoDeleting(false);
+          /* 削除成功時は編集モーダルに戻さない（履歴画面のままにする） */
+          undoFromEdit = false;
+          undoEditBackup = null;
           closeUndoConfirm();
           toast('取り消しました：' + fmtTimeShort(latest.ts) + ' ' + describeRecord(latest));
         }).catch(function () {
@@ -1725,6 +1765,8 @@
         editSaving = saving;
         var btn = document.getElementById('editSaveBtn');
         var cancelBtn = document.getElementById('editCancelBtn');
+        var deleteBtn = document.getElementById('editDeleteBtn');
+        if (deleteBtn) deleteBtn.disabled = saving;
         ['editDate', 'editHour', 'editMinute', 'editGrams'].forEach(function (id) { document.getElementById(id).disabled = saving; });
         if (saving) {
           if (!btn.dataset.label) btn.dataset.label = btn.textContent;
@@ -1840,6 +1882,7 @@
         document.getElementById('undoModal').addEventListener('click', function(ev){ if (ev.target === ev.currentTarget) closeUndoConfirm(); });
         document.getElementById('editForm').addEventListener('submit', submitEdit);
         document.getElementById('editCancelBtn').addEventListener('click', closeEditModal);
+        document.getElementById('editDeleteBtn').addEventListener('click', openDeleteFromEdit);
         document.getElementById('editModal').addEventListener('click', function(ev){ if (ev.target === ev.currentTarget) closeEditModal(); });
         document.getElementById('giverChange').addEventListener('click', function(){ openGiverModal(true); });
         document.getElementById('giverCancel').addEventListener('click', closeGiverModal);
