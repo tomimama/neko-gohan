@@ -191,7 +191,7 @@
       #homeView .cat-card.is-loading .hc-left { flex: 1 1 100%; }
       #homeView .cat-card.is-loading .hc-divider { display: none; }
       #homeView .cat-card.is-loading .hc-right { flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
-      #homeView .cat-card.is-loading .hc-total { margin-top: 0; order: 1; }
+      #homeView .cat-card.is-loading .hc-total-head { display: none; }
       #homeView .cat-card.is-loading .hc-goal { order: 2; text-align: left; margin-top: 0; }
       #homeView .cat-card.is-loading .hc-bar { order: 3; flex: 1 1 100%; margin-top: 2px; }
 
@@ -495,9 +495,9 @@
       .hc-left-sub { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; margin-top: 5px; min-width: 0; max-width: 100%; flex-wrap: wrap; }
       .hc-left-sub .last-ago, .hc-left-sub .last-giver { max-width: 100%; }
       .hc-left-sub .giver-tag { flex-wrap: wrap; white-space: normal; overflow-wrap: anywhere; }
-      .hc-total { display: flex; align-items: baseline; gap: 2px 4px; flex-wrap: wrap; white-space: normal; margin-top: 6px; font-size: 12.5px; font-weight: 700; color: var(--ink-soft); line-height: 1.35; min-width: 0; max-width: 100%; }
-      .hc-total-label { white-space: nowrap; flex: none; }
-      .hc-total-num { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 15px; color: var(--ink); white-space: nowrap; flex: none; }
+      .hc-total-head { display: block; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--ink-soft); line-height: 1.3; white-space: nowrap; max-width: 100%; }
+      .hc-prev { font-size: 14px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; line-height: 1.35; max-width: 100%; }
+      .hc-prev-num { font-family: "Zen Maru Gothic",sans-serif; font-weight: 900; font-size: 16px; color: var(--ink); }
       .hc-bar { display: block; width: 100%; max-width: 100%; margin-top: 4px; }
       .hc-goal { display: block; text-align: center; font-size: 11px; color: var(--ink-soft); font-weight: 700; margin-top: 3px; white-space: normal; overflow-wrap: anywhere; line-height: 1.4; min-width: 0; max-width: 100%; }
       .hc-right .total-over { margin-top: 2px; font-size: 11px; text-align: center; }
@@ -509,9 +509,9 @@
       #homeView .cat-card.is-empty .hc-left { flex: 1 1 100%; }
       #homeView .cat-card.is-empty .hc-divider { display: none; }
       #homeView .cat-card.is-empty .hc-right { flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
-      #homeView .cat-card.is-empty .hc-grams { display: none; }
+      #homeView .cat-card.is-empty .hc-grams { font-size: 21px; line-height: 1.25; order: 1; }
       #homeView .cat-card.is-empty .hc-time { font-size: 19px; line-height: 1.3; white-space: normal; padding-top: 2px; }
-      #homeView .cat-card.is-empty .hc-total { margin-top: 0; order: 1; }
+      #homeView .cat-card.is-empty .hc-total-head { order: 1; align-self: center; }
       #homeView .cat-card.is-empty .hc-goal { order: 2; text-align: left; margin-top: 0; }
       #homeView .cat-card.is-empty .hc-bar { order: 3; flex: 1 1 100%; margin-top: 2px; }
       #homeView .cat-card.is-empty .hc-right .total-over { order: 4; flex: 1 1 100%; text-align: left; margin-top: 1px; }
@@ -529,7 +529,6 @@
          記録ありカードの2列（左：時刻まわり／右：グラムまわり）はどの幅でも崩さない：
          縦積みへのフォールバックは使わず、足りない分は写真の縮小と余白・間隔の圧縮でまかなう */
       @media (max-width: 390px) {
-        .hc-total { justify-content: flex-start; }
         .hc-right { align-items: stretch; }
         .hc-grams { text-align: center; }
       }
@@ -541,7 +540,7 @@
         #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-main { gap: 5px; }
         #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-cols { flex-wrap: nowrap; gap: 5px; }
         #homeView .cat-card:not(.is-empty):not(.is-loading) .hc-top { gap: 4px; row-gap: 3px; }
-        .hc-total-label { white-space: normal; overflow-wrap: anywhere; flex: 0 1 auto; }
+        .hc-total-head { white-space: normal; overflow-wrap: anywhere; }
         .hc-goal { white-space: normal; overflow-wrap: anywhere; }
         #homeView .recent-badge { white-space: normal; overflow-wrap: anywhere; text-align: center; line-height: 1.3; }
       }
@@ -652,8 +651,8 @@
                   </span>
                   <span class="hc-divider" aria-hidden="true"></span>
                   <span class="hc-right">
-                    <span class="hc-grams" id="tokiCardGrams">—</span>
-                    <span class="hc-total"><span class="hc-total-label">今日の合計</span><span class="hc-total-num" id="tokiCardTotal">0g</span></span>
+                    <span class="hc-total-head">今日の合計</span>
+                    <span class="hc-grams" id="tokiCardGrams">0g</span>
                     <span class="bar hc-bar" aria-hidden="true"><i id="tokiCardBar" style="width:0%"></i></span>
                     <span class="hc-goal" id="tokiCardGoalLine">目標 40g（残り40g）</span>
                     <span class="total-over" id="tokiCardOver" hidden>目標オーバー！</span>
@@ -681,8 +680,8 @@
                   </span>
                   <span class="hc-divider" aria-hidden="true"></span>
                   <span class="hc-right">
-                    <span class="hc-grams" id="kotaroCardGrams">—</span>
-                    <span class="hc-total"><span class="hc-total-label">今日の合計</span><span class="hc-total-num" id="kotaroCardTotal">0g</span></span>
+                    <span class="hc-total-head">今日の合計</span>
+                    <span class="hc-grams" id="kotaroCardGrams">0g</span>
                   </span>
                 </span>
               </span>
@@ -1010,7 +1009,6 @@
           timeEl.textContent = '読み込み中…';
           gramsEl.textContent = '—';
           subEl.innerHTML = '<span class="hc-empty-sub">読み込んでいます</span>';
-          document.getElementById(cat+'CardTotal').textContent = '—';
           if (cat === 'toki') {
             document.getElementById('tokiCardGoalLine').textContent = '目標 40g';
             document.getElementById('tokiCardBar').style.width = '0%';
@@ -1027,8 +1025,7 @@
         if (latestToday) {
           cardEl.classList.remove('is-empty');
           timeEl.textContent = fmtTimeShort(latestToday.ts);
-          gramsEl.textContent = fmtGrams(latestToday.grams);
-          subEl.innerHTML = '<span class="last-ago">' + agoLabel(latestToday.ts) + '</span><span class="last-giver giver-tag">' + giverHTML(latestToday.giver) + '</span>';
+          subEl.innerHTML = '<span class="hc-prev">前回 <span class="hc-prev-num">' + fmtGrams(latestToday.grams) + '</span></span><span class="last-ago">' + agoLabel(latestToday.ts) + '</span><span class="last-giver giver-tag">' + giverHTML(latestToday.giver) + '</span>';
         } else {
           cardEl.classList.add('is-empty');
           var last = lastMeal(cat);
@@ -1037,7 +1034,7 @@
           subEl.innerHTML = '<span class="hc-empty-sub">' + (last ? '最後は ' + dayLabel(last.ts) + ' ' + fmtTimeShort(last.ts) + ' ・ ' + fmtGrams(last.grams) + ' <span class="giver-tag">' + giverHTML(last.giver) + '</span>' : 'まだ記録がありません') + '</span>';
         }
         var total = todayTotal(cat);
-        document.getElementById(cat+'CardTotal').textContent = fmtGrams(total);
+        gramsEl.textContent = fmtGrams(total);
         if (cat === 'toki') {
           var pct = Math.round(total / CATS.toki.goal * 100);
           var over = total > CATS.toki.goal;
