@@ -180,8 +180,13 @@
       .sync-status.loading .sync-spin { display: block; }
       /* 読み込み中（自動再試行の間を含む）は入力を受け付けない見た目にする：
          操作対象をグレーアウトし、タップも効かなくする（inert と併用） */
-      body.sync-locked .cat-card, body.sync-locked .snack-btn, body.sync-locked .vomit-btn, body.sync-locked .pick-cat, body.sync-locked .input-card, body.sync-locked .recent-list, body.sync-locked .history-list, body.sync-locked .day-block, body.sync-locked .history-link-btn, body.sync-locked .giver-badge, body.sync-locked .bottom-bar { opacity: .55; }
-      body.sync-locked .wrap button, body.sync-locked .wrap input, body.sync-locked .wrap textarea, body.sync-locked .bottom-bar button { pointer-events: none; }
+      body.sync-locked .cat-card, body.sync-locked .snack-btn, body.sync-locked .vomit-btn, body.sync-locked .pick-cat, body.sync-locked .input-card, body.sync-locked .recent-list, body.sync-locked .history-list, body.sync-locked .day-block, body.sync-locked .history-link-btn, body.sync-locked .giver-badge { opacity: .55; }
+      body.sync-locked .wrap button, body.sync-locked .wrap input, body.sync-locked .wrap textarea { pointer-events: none; }
+      /* 下部バーのナビゲーション（トップへ戻る・履歴）はロック対象外：
+         裏書き込み（送信待ち行列の処理）中はもちろん、読み込み再試行ロック中でも常に効くようにする。
+         「同期中…」などの表示は出すだけで、ボタンや画面遷移を無効化しない */
+      body.sync-locked .bottom-bar { opacity: 1; }
+      body.sync-locked .bottom-bar button { pointer-events: auto; }
       .cache-notice { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px dashed var(--card-border); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
       .cache-notice::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); flex: none; }
       /* 送信待ち（アウトボックス）の小さな表示：通常時は何も出さない */
@@ -988,8 +993,11 @@
       var outboxRetryTimer = null;
       function saveOutbox() { try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(outbox)); } catch (e) {} }
       function persistDisplay() { DataStore.setCachedRecords(state.records); }
-      /* 同期状態の小さな表示：送信待ちがある間だけ出す。通常時は何も出さない */
+      /* 同期状態の小さな表示：送信待ちがある間だけ出す。通常時は何も出さない。
+         これは表示専用で、ボタン・カード・画面遷移を一切無効化しない（disabled / inert / pointer-events を触らない） */
       function updateOutboxNotice() {
+        var bar = document.getElementById('bottomBar');
+        if (bar) bar.inert = false; /* 念のため：下部バーが inert のまま残っていたら必ず解除する */
         var el = document.getElementById('outboxNotice');
         if (!el) return;
         if (!outbox.length) { el.hidden = true; return; }
@@ -1020,8 +1028,10 @@
           outboxCurrent = null;
           outboxFailed = false;
           updateOutboxNotice();
-          /* 送り終わったら裏で一覧を取り直して表示を確定させる（お母さんのスマホの記録もここで取り込める） */
-          refreshRecords(false);
+          /* 送り終わったら裏で一覧を取り直して表示を確定させる（お母さんのスマホの記録もここで取り込める）。
+             この取り直しは書き込み処理の一部なので、絶対に画面やボタンをロックしない
+             （silent=true：読み込み再試行ロックとは連動させない。表示専用） */
+          refreshRecords(false, true);
           return;
         }
         var op = outbox[0];
@@ -1511,17 +1521,26 @@
         retry.hidden = mode !== 'error';
         if (passBtn) passBtn.hidden = mode !== 'pass';
       }
-      /* 読み込み中の入力ロック：各画面と下部バーを inert にし、見た目もグレーアウトする（body.sync-locked のCSS） */
+      /* 読み込み中の入力ロック：各画面を inert にし、見た目もグレーアウトする（body.sync-locked のCSS）。
+         これは読み込み（取得）失敗時の自動再試行中だけの仕様で、下部バーは対象外にする：
+         「トップへ戻る」「履歴」のナビゲーションは常に効かせる。
+         裏書き込み（送信待ち行列のフラッシュ）ではこのロックを一切呼ばない（表示専用の「同期中…」だけを出す） */
       function lockSyncInput(locked) {
         document.body.classList.toggle('sync-locked', locked);
-        ['homeView', 'inputView', 'snackView', 'historyView', 'bottomBar'].forEach(function (id) {
+        ['homeView', 'inputView', 'snackView', 'historyView'].forEach(function (id) {
           var el = document.getElementById(id);
           if (el) el.inert = locked;
         });
+        /* 下部バーは inert にしない（書き込み処理とも読み込みロックとも連動させない） */
+        var bar = document.getElementById('bottomBar');
+        if (bar) bar.inert = false;
       }
       var SYNC_RETRY_MAX = 2;        /* 自動再試行の回数（初回失敗のあと最大2回まで自動で取り直す。初回＋2回＝最大3回試行） */
       var SYNC_RETRY_DELAYS = [1000, 2000];   /* 自動再試行の間隔（ミリ秒）：1秒→2秒と延ばす。合計3秒 */
-      function refreshRecords(showLoading) {
+      /* silent=true は裏側専用：送信待ち行列の処理後に呼ぶ取り直し用。
+         silent のときは読み込み再試行ロック（lockSyncInput）を一切使わず、
+         失敗しても画面・ボタンを止めず、エラー表示で遷移を妨げない */
+      function refreshRecords(showLoading, silent) {
         if (syncBusy) return Promise.resolve(false);
         syncBusy = true;
         /* 合言葉が未設定なら通信はしない。自動再試行もせず、合言葉の案内だけを出す */
@@ -1534,6 +1553,7 @@
         }
         var engaged = false;
         function engage() {
+          if (silent) return; /* 裏書き込み後の取り直しではロックも読み込み中表示も出さない */
           if (engaged) return;
           engaged = true;
           setSyncStatus('loading', '読み込み中…');
@@ -1576,11 +1596,12 @@
               var delay = SYNC_RETRY_DELAYS[attempt - 1] || SYNC_RETRY_DELAYS[SYNC_RETRY_DELAYS.length - 1];
               return new Promise(function (resolve) { setTimeout(resolve, delay); }).then(tryOnce);
             }
-            /* 自動再試行を使い切って初めて、失敗の表示と「再試行」ボタンを出す */
+            /* 自動再試行を使い切って初めて、失敗の表示と「再試行」ボタンを出す。
+               ただし silent（裏書き込み後の取り直し）では表示もロックも出さず、今の表示を保つだけにする */
             syncBusy = false;
             disengage();
             if (!state.showingCached) state.hasLoadedOnce = true;
-            setSyncStatus('error', '読み込めませんでした');
+            if (!silent) setSyncStatus('error', '読み込めませんでした');
             renderAll();
             return false;
           });
